@@ -568,7 +568,7 @@
                                     Dashboard
                                 </a>
                             @else
-                                <a href="{{ route('login') }}" class="nav-link">
+                                <a href="{{ route('login') }}" class="nav-link font-bold">
                                     Log in
                                 </a>
                                 @if (Route::has('register'))

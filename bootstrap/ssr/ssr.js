@@ -20,7 +20,7 @@ createServer(
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(
       `./Pages/${name}.tsx`,
-      /* @__PURE__ */ Object.assign({ "./Pages/Auth/Login.tsx": () => import("./assets/Login-CRZyWrkj.js"), "./Pages/Auth/Register.tsx": () => import("./assets/Register-fYcKh6-d.js"), "./Pages/Dashboard.tsx": () => import("./assets/Dashboard-BdD148qa.js"), "./Pages/Welcome.tsx": () => import("./assets/Welcome-Dg7rYSC6.js") })
+      /* @__PURE__ */ Object.assign({ "./Pages/Auth/Login.tsx": () => import("./assets/Login-CRZyWrkj.js"), "./Pages/Auth/Register.tsx": () => import("./assets/Register-fYcKh6-d.js"), "./Pages/Dashboard.tsx": () => import("./assets/Dashboard-BCRVNXPS.js"), "./Pages/Product.tsx": () => import("./assets/Product-BwKAqLJv.js"), "./Pages/SearchResults.tsx": () => import("./assets/SearchResults-3GNV_dvn.js"), "./Pages/Terms.tsx": () => import("./assets/Terms-CLT5EwKl.js"), "./Pages/Welcome.tsx": () => import("./assets/Welcome-DgD35VU7.js") })
     ),
     setup: ({ App, props }) => /* @__PURE__ */ jsx(App, { ...props })
   })

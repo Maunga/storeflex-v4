@@ -1,6 +1,71 @@
-import { jsxs, Fragment, jsx } from "react/jsx-runtime";
-import { useState, useRef, useEffect } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { jsx, jsxs, Fragment } from "react/jsx-runtime";
+import { useState, useEffect, useRef } from "react";
+import { usePage, Head, Link, router } from "@inertiajs/react";
+function Toast({ message, type = "error", duration = 5e3, onDismiss }) {
+  const [visible, setVisible] = useState(false);
+  const [exiting, setExiting] = useState(false);
+  useEffect(() => {
+    if (message) {
+      setVisible(true);
+      setExiting(false);
+      const timer = setTimeout(() => {
+        dismiss();
+      }, duration);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+  const dismiss = () => {
+    setExiting(true);
+    setTimeout(() => {
+      setVisible(false);
+      setExiting(false);
+      onDismiss?.();
+    }, 300);
+  };
+  if (!visible || !message) return null;
+  const bgColor = {
+    error: "bg-red-600 dark:bg-red-500",
+    success: "bg-emerald-600 dark:bg-emerald-500",
+    info: "bg-blue-600 dark:bg-blue-500"
+  }[type];
+  const icon = {
+    error: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+      /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "10" }),
+      /* @__PURE__ */ jsx("line", { x1: "15", y1: "9", x2: "9", y2: "15" }),
+      /* @__PURE__ */ jsx("line", { x1: "9", y1: "9", x2: "15", y2: "15" })
+    ] }),
+    success: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+      /* @__PURE__ */ jsx("path", { d: "M22 11.08V12a10 10 0 1 1-5.93-9.14" }),
+      /* @__PURE__ */ jsx("polyline", { points: "22 4 12 14.01 9 11.01" })
+    ] }),
+    info: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+      /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "10" }),
+      /* @__PURE__ */ jsx("line", { x1: "12", y1: "16", x2: "12", y2: "12" }),
+      /* @__PURE__ */ jsx("line", { x1: "12", y1: "8", x2: "12.01", y2: "8" })
+    ] })
+  }[type];
+  return /* @__PURE__ */ jsx("div", { className: "fixed top-6 right-6 z-[9999]", children: /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: `flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl text-white text-sm font-medium max-w-md ${bgColor} ${exiting ? "animate-toast-exit" : "animate-toast-enter"}`,
+      children: [
+        icon,
+        /* @__PURE__ */ jsx("span", { className: "leading-snug", children: message }),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            onClick: dismiss,
+            className: "ml-2 p-0.5 rounded-md hover:bg-white/20 transition-colors flex-shrink-0",
+            children: /* @__PURE__ */ jsxs("svg", { className: "w-4 h-4", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
+              /* @__PURE__ */ jsx("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
+              /* @__PURE__ */ jsx("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
+            ] })
+          }
+        )
+      ]
+    }
+  ) });
+}
 const marketingStatements = [
   { text: "Amazon.ae" },
   { text: "any product name" },
@@ -8,10 +73,20 @@ const marketingStatements = [
 ];
 function Welcome({ auth, canLogin, canRegister }) {
   const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
   const textareaRef = useRef(null);
+  const { toast } = usePage().props;
+  const [toastMessage, setToastMessage] = useState(null);
+  const [toastType, setToastType] = useState("error");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  useEffect(() => {
+    if (toast) {
+      setToastType(toast.type ?? "error");
+      setToastMessage(toast.message);
+    }
+  }, [toast]);
   useEffect(() => {
     const currentStatement = marketingStatements[currentIndex].text;
     const typingSpeed = isDeleting ? 50 : 100;
@@ -45,10 +120,27 @@ function Welcome({ auth, canLogin, canRegister }) {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Search:", query);
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setLoading(true);
+    const isAmazonUrl = /^https?:\/\/(www\.)?amazon\.ae\//i.test(trimmed);
+    if (isAmazonUrl) {
+      router.post("/search", { query: trimmed }, {
+        onFinish: () => setLoading(false)
+      });
+    } else {
+      router.get("/search", { q: trimmed }, {
+        onFinish: () => setLoading(false)
+      });
+    }
   };
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(Head, { title: "Your Dropshipping Assistant" }),
+    /* @__PURE__ */ jsx(Toast, { message: toastMessage, type: toastType, onDismiss: () => setToastMessage(null) }),
+    loading && /* @__PURE__ */ jsx("div", { className: "fixed inset-0 bg-white/60 dark:bg-neutral-950/60 z-50 flex items-center justify-center backdrop-blur-sm", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3 animate-fade-in", children: [
+      /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#811753] rounded-full animate-spin" }),
+      /* @__PURE__ */ jsx("span", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: "Searching..." })
+    ] }) }),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
       auth?.user && /* @__PURE__ */ jsxs("aside", { className: "hidden lg:flex w-[260px] flex-col p-4 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800", children: [
         /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800", children: [
@@ -91,7 +183,7 @@ function Welcome({ auth, canLogin, canRegister }) {
               Link,
               {
                 href: "/login",
-                className: "px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors",
+                className: "px-4 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors font-bold",
                 children: "Log in"
               }
             ),
@@ -99,7 +191,7 @@ function Welcome({ auth, canLogin, canRegister }) {
               Link,
               {
                 href: "/register",
-                className: "px-4 py-2 text-sm font-medium text-white bg-[#811753] hover:bg-[#61113E] rounded-lg transition-colors",
+                className: "px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 rounded-lg transition-colors",
                 children: "Get Started"
               }
             )
@@ -211,7 +303,9 @@ function Welcome({ auth, canLogin, canRegister }) {
           " ",
           /* @__PURE__ */ jsx("a", { href: "https://dxbrunners.com", target: "_blank", rel: "noopener noreferrer", className: "text-[#a855f7] hover:underline", children: "DXB Runners" }),
           " ",
-          "· Your trusted dropshipping partner for Amazon.ae products"
+          "· Your trusted dropshipping partner for Amazon.ae products ·",
+          " ",
+          /* @__PURE__ */ jsx(Link, { href: "/terms", className: "text-[#a855f7] hover:underline", children: "Terms & Conditions" })
         ] }) })
       ] })
     ] })

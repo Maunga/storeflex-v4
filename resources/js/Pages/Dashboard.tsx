@@ -134,6 +134,10 @@ export default function Dashboard({ auth }: PageProps) {
                                 DXB Runners
                             </a>{' '}
                             &middot; Your trusted dropshipping partner for Amazon.ae products
+                            &middot;{' '}
+                            <Link href="/terms" className="text-[#a855f7] hover:underline">
+                                Terms & Conditions
+                            </Link>
                         </p>
                     </footer>
                 </div>

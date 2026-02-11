@@ -92,6 +92,15 @@ class AmazonAeScraperService implements EcommerceScraperInterface
             }
         }
 
+        // Only run prepareResponse when we have valid item data
+        if (!$data['success'] || empty($data['item'])) {
+            return [
+                'success' => false,
+                'message' => $data['message'] ?? 'Failed to scrape product data',
+                'data' => []
+            ];
+        }
+
         return $this->prepareResponse($data);
     }
 

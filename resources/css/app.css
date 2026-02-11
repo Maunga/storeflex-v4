@@ -182,6 +182,53 @@
     animation: blink 0.8s infinite;
 }
 
+/* Page enter transition */
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.99);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.animate-page-enter {
+    animation: page-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Toast animations */
+@keyframes toast-enter {
+    from {
+        opacity: 0;
+        transform: translateX(100%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes toast-exit {
+    from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%) scale(0.95);
+    }
+}
+
+.animate-toast-enter {
+    animation: toast-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-toast-exit {
+    animation: toast-exit 0.3s ease-in forwards;
+}
+
 /* ==========================================================================
    UTILITY OVERRIDES
    ========================================================================== */

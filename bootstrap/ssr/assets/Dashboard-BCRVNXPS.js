@@ -116,7 +116,9 @@ function Dashboard({ auth }) {
           " ",
           /* @__PURE__ */ jsx("a", { href: "https://dxbrunners.com", target: "_blank", rel: "noopener noreferrer", className: "text-[#a855f7] hover:underline", children: "DXB Runners" }),
           " ",
-          "· Your trusted dropshipping partner for Amazon.ae products"
+          "· Your trusted dropshipping partner for Amazon.ae products ·",
+          " ",
+          /* @__PURE__ */ jsx(Link, { href: "/terms", className: "text-[#a855f7] hover:underline", children: "Terms & Conditions" })
         ] }) })
       ] })
     ] })

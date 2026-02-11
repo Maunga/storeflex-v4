@@ -1,5 +1,8 @@
 {
   "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
+  "resources/js/Components/Toast.tsx": [
+    "/build/assets/Welcome-DgD35VU7.js"
+  ],
   "resources/js/Pages/Auth/Login.tsx": [
     "/build/assets/Login-CRZyWrkj.js"
   ],
@@ -7,10 +10,19 @@
     "/build/assets/Register-fYcKh6-d.js"
   ],
   "resources/js/Pages/Dashboard.tsx": [
-    "/build/assets/Dashboard-BdD148qa.js"
+    "/build/assets/Dashboard-BCRVNXPS.js"
+  ],
+  "resources/js/Pages/Product.tsx": [
+    "/build/assets/Product-BwKAqLJv.js"
+  ],
+  "resources/js/Pages/SearchResults.tsx": [
+    "/build/assets/SearchResults-3GNV_dvn.js"
+  ],
+  "resources/js/Pages/Terms.tsx": [
+    "/build/assets/Terms-CLT5EwKl.js"
   ],
   "resources/js/Pages/Welcome.tsx": [
-    "/build/assets/Welcome-Dg7rYSC6.js"
+    "/build/assets/Welcome-DgD35VU7.js"
   ],
   "resources/js/ssr.tsx": []
 }

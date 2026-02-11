@@ -123,4 +123,44 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Oxylabs Web Scraping
+    |--------------------------------------------------------------------------
+    */
+
+    'oxylabs_endpoint' => env('OXYLABS_ENDPOINT', 'https://realtime.oxylabs.io/v1/queries'),
+    'oxylabs_token' => env('OXYLABS_TOKEN'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Amazon AE Configuration
+    |--------------------------------------------------------------------------
+    */
+
+    'amazon_ae_url' => env('AMAZON_AE_URL', 'https://www.amazon.ae/'),
+    'amazon_ae_prefix' => env('AMAZON_AE_PREFIX', 'https://www.amazon.ae/dp/'),
+    'amazon_ae_cache_prefix' => env('AMAZON_AE_CACHE_PREFIX', 'amazon_ae_'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | WooCommerce Integration
+    |--------------------------------------------------------------------------
+    */
+
+    'woocommerce_url' => env('WOOCOMMERCE_URL'),
+    'woocommerce_api_token' => env('WOOCOMMERCE_API_TOKEN'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Pricing & Commissions
+    |--------------------------------------------------------------------------
+    */
+
+    'cache_time' => (int) env('CACHE_TIME', 10080),
+    'shipping_price_aed_per_kg' => (float) env('SHIPPING_PRICE_AED_PER_KG', 40),
+    'aed_rate_to_usd' => (float) env('AED_RATE_TO_USD', 3.67),
+    'fixed_commission_per_item_aed' => (float) env('FIXED_COMMISSION_PER_ITEM_AED', 15),
+    'overall_commission_percentage' => (float) env('OVERALL_COMMISSION_PERCENTAGE', 27.5),
+
 ];
