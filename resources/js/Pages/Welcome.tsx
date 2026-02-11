@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, ChangeEvent, FormEvent } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage, useRemember } from '@inertiajs/react';
 import { PageProps } from '@/types';
 import Toast from '@/Components/Toast';
 
@@ -19,7 +19,7 @@ interface WelcomeProps extends PageProps {
 }
 
 export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useRemember('', 'search-query');
     const [loading, setLoading] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const { toast } = usePage<WelcomeProps>().props;

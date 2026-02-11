@@ -81,7 +81,7 @@ function Product({ auth, product, identifier }) {
                 ] })
               ] }),
               /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3", children: [
-                /* @__PURE__ */ jsxs("div", { className: "flex items-baseline gap-3 flex-wrap", children: [
+                product.price != null && product.price > 0 && product.stock !== "Currently unavailable" ? /* @__PURE__ */ jsxs("div", { className: "flex items-baseline gap-3 flex-wrap", children: [
                   product.dxb_price && /* @__PURE__ */ jsxs("div", { children: [
                     /* @__PURE__ */ jsx("span", { className: "text-xs text-neutral-400 block mb-0.5", children: "DXB Runners Price" }),
                     /* @__PURE__ */ jsxs("span", { className: "text-3xl font-bold text-[#811753]", children: [
@@ -89,7 +89,7 @@ function Product({ auth, product, identifier }) {
                       product.dxb_price
                     ] })
                   ] }),
-                  product.price != null && /* @__PURE__ */ jsxs("div", { className: "ml-4", children: [
+                  /* @__PURE__ */ jsxs("div", { className: product.dxb_price ? "ml-4" : "", children: [
                     /* @__PURE__ */ jsx("span", { className: "text-xs text-neutral-400 block mb-0.5", children: "Amazon.ae" }),
                     /* @__PURE__ */ jsxs("span", { className: "text-xl font-semibold text-neutral-700 dark:text-neutral-300", children: [
                       product.currency ?? "AED",
@@ -102,7 +102,7 @@ function Product({ auth, product, identifier }) {
                     " ",
                     product.price_strikethrough
                   ] })
-                ] }),
+                ] }) : /* @__PURE__ */ jsx("p", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: "Price unavailable" }),
                 product.is_prime_eligible && /* @__PURE__ */ jsx("span", { className: "inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded-md", children: "✓ Prime Eligible" }),
                 product.stock && /* @__PURE__ */ jsx("p", { className: `text-sm font-medium ${product.stock === "In Stock" ? "text-emerald-600" : "text-red-500"}`, children: product.stock })
               ] }),
@@ -131,14 +131,29 @@ function Product({ auth, product, identifier }) {
               ] }),
               product.variation && product.variation.length > 1 && /* @__PURE__ */ jsxs("div", { className: "space-y-2", children: [
                 /* @__PURE__ */ jsx("h3", { className: "text-sm font-semibold text-neutral-700 dark:text-neutral-300", children: "Available Options" }),
-                /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2", children: product.variation.map((v) => /* @__PURE__ */ jsx(
-                  "span",
-                  {
-                    className: `px-3 py-1.5 text-sm rounded-lg border transition-colors ${v.selected ? "border-[#811753] bg-[#811753]/10 text-[#811753] font-medium" : "border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400"}`,
-                    children: Object.values(v.dimensions).join(" / ")
-                  },
-                  v.asin
-                )) })
+                /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2", children: product.variation.map((v) => {
+                  const isActive = v.asin === identifier || v.selected;
+                  const label = Object.values(v.dimensions).join(" / ");
+                  return isActive ? /* @__PURE__ */ jsx(
+                    "span",
+                    {
+                      className: "px-3 py-1.5 text-sm rounded-lg border border-[#811753] bg-[#811753]/10 text-[#811753] font-medium cursor-default",
+                      title: v.asin,
+                      children: label
+                    },
+                    v.asin
+                  ) : /* @__PURE__ */ jsx(
+                    Link,
+                    {
+                      href: `/product/${v.asin}`,
+                      replace: true,
+                      className: "px-3 py-1.5 text-sm rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:border-[#811753] hover:text-[#811753] hover:bg-[#811753]/5 transition-colors",
+                      title: v.asin,
+                      children: label
+                    },
+                    v.asin
+                  );
+                }) })
               ] }),
               seller && /* @__PURE__ */ jsxs("div", { className: "text-sm text-neutral-500 dark:text-neutral-400 pt-2 border-t border-neutral-100 dark:border-neutral-800", children: [
                 "Sold by ",

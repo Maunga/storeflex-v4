@@ -150,6 +150,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
 
                                     {/* Price Block */}
                                     <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">
+                                        {product.price != null && product.price > 0 && product.stock !== 'Currently unavailable' ? (
                                         <div className="flex items-baseline gap-3 flex-wrap">
                                             {product.dxb_price && (
                                                 <div>
@@ -159,20 +160,21 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                                     </span>
                                                 </div>
                                             )}
-                                            {product.price != null && (
-                                                <div className="ml-4">
-                                                    <span className="text-xs text-neutral-400 block mb-0.5">Amazon.ae</span>
-                                                    <span className="text-xl font-semibold text-neutral-700 dark:text-neutral-300">
-                                                        {product.currency ?? 'AED'} {product.price}
-                                                    </span>
-                                                </div>
-                                            )}
+                                            <div className={product.dxb_price ? 'ml-4' : ''}>
+                                                <span className="text-xs text-neutral-400 block mb-0.5">Amazon.ae</span>
+                                                <span className="text-xl font-semibold text-neutral-700 dark:text-neutral-300">
+                                                    {product.currency ?? 'AED'} {product.price}
+                                                </span>
+                                            </div>
                                             {product.price_strikethrough != null && product.price_strikethrough > 0 && (
                                                 <span className="text-base text-neutral-400 line-through">
                                                     {product.currency ?? 'AED'} {product.price_strikethrough}
                                                 </span>
                                             )}
                                         </div>
+                                        ) : (
+                                            <p className="text-sm text-neutral-500 dark:text-neutral-400">Price unavailable</p>
+                                        )}
 
                                         {product.is_prime_eligible && (
                                             <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded-md">
@@ -220,18 +222,29 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                         <div className="space-y-2">
                                             <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Available Options</h3>
                                             <div className="flex flex-wrap gap-2">
-                                                {product.variation.map((v) => (
-                                                    <span
-                                                        key={v.asin}
-                                                        className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
-                                                            v.selected
-                                                                ? 'border-[#811753] bg-[#811753]/10 text-[#811753] font-medium'
-                                                                : 'border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400'
-                                                        }`}
-                                                    >
-                                                        {Object.values(v.dimensions).join(' / ')}
-                                                    </span>
-                                                ))}
+                                                {product.variation.map((v) => {
+                                                    const isActive = v.asin === identifier || v.selected;
+                                                    const label = Object.values(v.dimensions).join(' / ');
+                                                    return isActive ? (
+                                                        <span
+                                                            key={v.asin}
+                                                            className="px-3 py-1.5 text-sm rounded-lg border border-[#811753] bg-[#811753]/10 text-[#811753] font-medium cursor-default"
+                                                            title={v.asin}
+                                                        >
+                                                            {label}
+                                                        </span>
+                                                    ) : (
+                                                        <Link
+                                                            key={v.asin}
+                                                            href={`/product/${v.asin}`}
+                                                            replace
+                                                            className="px-3 py-1.5 text-sm rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:border-[#811753] hover:text-[#811753] hover:bg-[#811753]/5 transition-colors"
+                                                            title={v.asin}
+                                                        >
+                                                            {label}
+                                                        </Link>
+                                                    );
+                                                })}
                                             </div>
                                         </div>
                                     )}

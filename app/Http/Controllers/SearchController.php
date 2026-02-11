@@ -40,50 +40,21 @@ class SearchController extends Controller
      */
     public function showProduct(string $asin)
     {
-        // 1. Try the scraper cache first (fastest)
-        $cacheKey = config('app.amazon_ae_cache_prefix') . $asin;
-        $cached = Cache::get($cacheKey);
+        $product = $this->resolveProduct($asin);
 
-        if ($cached) {
-            $itemWeight = $this->amazonAeScraperService->determineWeight($cached);
-            $price = $this->amazonAeScraperService->calculatePrice(
-                $cached['price_upper'], $cached['price_shipping'], $itemWeight
-            );
-            $product = array_merge($cached, [
-                'dxb_price' => $price,
-                'item_weight' => $itemWeight,
-                'scraped_url' => config('app.amazon_ae_prefix') . $asin,
-            ]);
-
-            return Inertia::render('Product', [
-                'product' => $product,
-                'identifier' => $asin,
+        if (!$product) {
+            return redirect('/')->with('toast', [
+                'type' => 'error',
+                'message' => 'Product not found. It may no longer be available.',
             ]);
         }
 
-        // 2. Try the database (AmazonAeItem)
-        $dbResult = $this->amazonAeScraperService->retrieveUploadedProduct($asin);
-        if ($dbResult['success'] && !empty($dbResult['data']['item'])) {
-            return Inertia::render('Product', [
-                'product' => $dbResult['data']['item'],
-                'identifier' => $asin,
-            ]);
-        }
+        // Preload variation ASINs into cache in the background
+        $this->preloadVariations($product, $asin);
 
-        // 3. Try a fresh scrape
-        $url = config('app.amazon_ae_prefix') . $asin;
-        $result = $this->amazonAeScraperService->attemptScrape($url);
-
-        if (!empty($result['success']) && !empty($result['data']['item'])) {
-            return Inertia::render('Product', [
-                'product' => $result['data']['item'],
-                'identifier' => $result['data']['identifier'] ?? $asin,
-            ]);
-        }
-
-        return redirect('/')->with('toast', [
-            'type' => 'error',
-            'message' => 'Product not found. It may no longer be available.',
+        return Inertia::render('Product', [
+            'product' => $product,
+            'identifier' => $asin,
         ]);
     }
 
@@ -136,6 +107,85 @@ class SearchController extends Controller
     }
 
     // ─── Private helpers ───────────────────────────────────────────────
+
+    /**
+     * Resolve a product from cache, DB, or fresh scrape.
+     */
+    private function resolveProduct(string $asin): ?array
+    {
+        // 1. Try scraper cache (fastest)
+        $cacheKey = config('app.amazon_ae_cache_prefix') . $asin;
+        $cached = Cache::get($cacheKey);
+
+        if ($cached) {
+            $itemWeight = $this->amazonAeScraperService->determineWeight($cached);
+            $price = $this->amazonAeScraperService->calculatePrice(
+                $cached['price_upper'], $cached['price_shipping'], $itemWeight
+            );
+            return array_merge($cached, [
+                'dxb_price' => $price,
+                'item_weight' => $itemWeight,
+                'scraped_url' => config('app.amazon_ae_prefix') . $asin,
+            ]);
+        }
+
+        // 2. Try DB
+        $dbResult = $this->amazonAeScraperService->retrieveUploadedProduct($asin);
+        if ($dbResult['success'] && !empty($dbResult['data']['item'])) {
+            $item = $dbResult['data']['item'];
+            return is_array($item) ? $item : $item->toArray();
+        }
+
+        // 3. Fresh scrape
+        $url = config('app.amazon_ae_prefix') . $asin;
+        $result = $this->amazonAeScraperService->attemptScrape($url);
+
+        if (!empty($result['success']) && !empty($result['data']['item'])) {
+            return $result['data']['item'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Preload variation ASINs into the scraper cache so navigation is instant.
+     * Uses deferred execution so the response is sent first.
+     */
+    private function preloadVariations(array $product, string $currentAsin): void
+    {
+        $variations = $product['variation'] ?? [];
+        if (empty($variations) || !is_array($variations)) {
+            return;
+        }
+
+        $prefix = config('app.amazon_ae_cache_prefix');
+        $asinsToPreload = [];
+
+        foreach ($variations as $v) {
+            $varAsin = $v['asin'] ?? null;
+            if ($varAsin && $varAsin !== $currentAsin && !Cache::has($prefix . $varAsin)) {
+                $asinsToPreload[] = $varAsin;
+            }
+        }
+
+        if (empty($asinsToPreload)) {
+            return;
+        }
+
+        Log::info('SearchController: Preloading variation ASINs', ['count' => count($asinsToPreload), 'asins' => $asinsToPreload]);
+
+        // Use defer/after-response to preload without blocking the page render
+        app()->terminating(function () use ($asinsToPreload) {
+            foreach ($asinsToPreload as $varAsin) {
+                try {
+                    $url = config('app.amazon_ae_prefix') . $varAsin;
+                    $this->amazonAeScraperService->pullSiteData($url);
+                } catch (\Throwable $e) {
+                    Log::warning("Failed to preload ASIN {$varAsin}: " . $e->getMessage());
+                }
+            }
+        });
+    }
 
     private function isAmazonAeUrl(string $query): bool
     {

@@ -1,6 +1,6 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import { useState, useEffect, useRef } from "react";
-import { usePage, Head, Link, router } from "@inertiajs/react";
+import { useRemember, usePage, Head, Link, router } from "@inertiajs/react";
 function Toast({ message, type = "error", duration = 5e3, onDismiss }) {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
@@ -72,7 +72,7 @@ const marketingStatements = [
   { text: "a direct link" }
 ];
 function Welcome({ auth, canLogin, canRegister }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useRemember("", "search-query");
   const [loading, setLoading] = useState(false);
   const textareaRef = useRef(null);
   const { toast } = usePage().props;
