@@ -80,9 +80,9 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                 </nav>
                             )}
 
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-start">
                                 {/* Image Gallery */}
-                                <div className="space-y-3">
+                                <div className="space-y-3 animate-fade-in-up lg:sticky lg:top-24">
                                     {images.length > 0 && (
                                         <>
                                             <div
@@ -152,7 +152,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                 </div>
 
                                 {/* Product Details */}
-                                <div className="space-y-6">
+                                <div className="space-y-6 animate-fade-in-up animate-delay-100">
                                     {/* Brand */}
                                     {product.brand && (
                                         <p className="text-sm font-medium text-emerald-700 dark:text-[#86efac] uppercase tracking-wide">{product.brand}</p>
@@ -215,7 +215,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                 </div>
 
                                 {/* Column 3: Price & Options */}
-                                <div className="space-y-6">
+                                <div className="space-y-6 animate-fade-in-up animate-delay-200 lg:sticky lg:top-24">
 
                                      {/* Amazon Link */}
                                     {(product.url || product.scraped_url) && (
@@ -223,7 +223,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                             href={product.url?.startsWith('http') ? product.url : `https://www.amazon.ae${product.url ?? ''}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-emerald-950 bg-[#86efac] hover:bg-[#6ddb94] rounded-lg transition-colors shadow-sm"
+                                            className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-emerald-700 dark:text-[#86efac] border-2 border-emerald-600 dark:border-[#86efac] hover:bg-emerald-50 dark:hover:bg-[#86efac]/10 rounded-lg transition-colors"
                                         >
                                             View on Amazon.ae
                                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
