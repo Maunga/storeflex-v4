@@ -24,7 +24,7 @@ function Dashboard({ auth }) {
               href: "/logout",
               method: "post",
               as: "button",
-              className: "text-xs text-neutral-500 hover:text-[#811753] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors",
+              className: "text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors",
               children: "Log out"
             }
           )
@@ -80,7 +80,7 @@ function Dashboard({ auth }) {
                   href: "/",
                   className: "flex items-center gap-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors",
                   children: [
-                    /* @__PURE__ */ jsx("div", { className: "w-10 h-10 rounded-lg bg-[#811753]/10 flex items-center justify-center", children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 text-[#811753]", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
+                    /* @__PURE__ */ jsx("div", { className: "w-10 h-10 rounded-lg bg-[#86efac]/10 flex items-center justify-center", children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 text-[#86efac]", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
                       /* @__PURE__ */ jsx("circle", { cx: "11", cy: "11", r: "8" }),
                       /* @__PURE__ */ jsx("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" })
                     ] }) }),

@@ -1,19 +1,14 @@
-import { FormEvent } from 'react';
+import { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 
-interface LoginProps {
-    status?: string;
-    canResetPassword: boolean;
-}
-
-export default function Login({ status, canResetPassword }: LoginProps) {
+export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
         email: '',
         password: '',
         remember: false,
     });
 
-    const submit = (e: FormEvent<HTMLFormElement>) => {
+    const submit = (e) => {
         e.preventDefault();
         post('/login', {
             onFinish: () => reset('password'),

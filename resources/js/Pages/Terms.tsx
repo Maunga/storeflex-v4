@@ -18,7 +18,7 @@ export default function Terms({ auth }: PageProps) {
                                 href="/logout"
                                 method="post"
                                 as="button"
-                                className="text-xs text-neutral-500 hover:text-[#811753] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors"
+                                className="text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors"
                             >
                                 Log out
                             </Link>
@@ -45,7 +45,7 @@ export default function Terms({ auth }: PageProps) {
                             {auth?.user ? (
                                 <Link
                                     href="/dashboard"
-                                    className="px-4 py-2 text-sm font-medium text-white bg-[#811753] hover:bg-[#61113E] rounded-lg transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-white bg-[#86efac] hover:bg-[#61113E] rounded-lg transition-colors"
                                 >
                                     Dashboard
                                 </Link>

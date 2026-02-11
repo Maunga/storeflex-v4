@@ -9,7 +9,7 @@
 @layer base {
     :root {
         /* Brand Colors */
-        --color-primary: 129 23 83;          /* #811753 - Storeflex Magenta */
+        --color-primary: 129 23 83;          /* #86efac - Storeflex Magenta */
         --color-primary-hover: 97 17 62;     /* #61113E - Darker magenta */
         --color-secondary: 234 179 8;        /* #EAB308 - Gold/Yellow accent */
         --color-accent: 168 85 247;          /* #A855F7 - Purple accent */

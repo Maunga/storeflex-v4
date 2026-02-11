@@ -1,43 +1,20 @@
-import { useState, useRef, useEffect, ChangeEvent, FormEvent } from 'react';
-import { Head, Link, router, usePage, useRemember } from '@inertiajs/react';
-import { PageProps } from '@/types';
-import Toast from '@/Components/Toast';
+import { useState, useRef, useEffect } from 'react';
+import { Head, Link } from '@inertiajs/react';
 
-interface MarketingStatement {
-    text: string;
-}
-
-const marketingStatements: MarketingStatement[] = [
+const marketingStatements = [
     { text: 'Amazon.ae' },
     { text: 'any product name' },
     { text: 'a direct link' },
 ];
 
-interface WelcomeProps extends PageProps {
-    canLogin: boolean;
-    canRegister: boolean;
-}
-
-export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
-    const [query, setQuery] = useRemember('', 'search-query');
-    const [loading, setLoading] = useState(false);
-    const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const { toast } = usePage<WelcomeProps>().props;
-    const [toastMessage, setToastMessage] = useState<string | null>(null);
-    const [toastType, setToastType] = useState<'error' | 'success' | 'info'>('error');
+export default function Welcome({ auth, canLogin, canRegister }) {
+    const [query, setQuery] = useState('');
+    const textareaRef = useRef(null);
     
     // Typing animation state
     const [currentIndex, setCurrentIndex] = useState(0);
     const [displayText, setDisplayText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
-
-    // Show flash toast messages
-    useEffect(() => {
-        if (toast) {
-            setToastType(toast.type ?? 'error');
-            setToastMessage(toast.message);
-        }
-    }, [toast]);
     
     useEffect(() => {
         const currentStatement = marketingStatements[currentIndex].text;
@@ -64,50 +41,26 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
         return () => clearTimeout(timeout);
     }, [displayText, isDeleting, currentIndex]);
 
-    const handleTextareaInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const handleTextareaInput = (e) => {
         setQuery(e.target.value);
         e.target.style.height = 'auto';
         e.target.style.height = e.target.scrollHeight + 'px';
     };
 
-    const setQuickAction = (value: string) => {
+    const setQuickAction = (value) => {
         setQuery(value);
         textareaRef.current?.focus();
     };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-        const trimmed = query.trim();
-        if (!trimmed) return;
-        setLoading(true);
-
-        // Amazon URLs need the POST scrape flow; text queries go to GET /search?q=
-        const isAmazonUrl = /^https?:\/\/(www\.)?amazon\.ae\//i.test(trimmed);
-        if (isAmazonUrl) {
-            router.post('/search', { query: trimmed }, {
-                onFinish: () => setLoading(false),
-            });
-        } else {
-            router.get('/search', { q: trimmed }, {
-                onFinish: () => setLoading(false),
-            });
-        }
+        // TODO: Handle search submission
+        console.log('Search:', query);
     };
 
     return (
         <>
             <Head title="Your Dropshipping Assistant" />
-            <Toast message={toastMessage} type={toastType} onDismiss={() => setToastMessage(null)} />
-
-            {/* Loading Overlay */}
-            {loading && (
-                <div className="fixed inset-0 bg-white/60 dark:bg-neutral-950/60 z-50 flex items-center justify-center backdrop-blur-sm">
-                    <div className="flex flex-col items-center gap-3 animate-fade-in">
-                        <div className="w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#86efac] rounded-full animate-spin" />
-                        <span className="text-sm text-neutral-500 dark:text-neutral-400">Searching...</span>
-                    </div>
-                </div>
-            )}
 
             <div className="flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950">
                 {/* Sidebar for chat history - only shown to logged in users */}
@@ -165,14 +118,14 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                                     <>
                                         <Link
                                             href="/login"
-                                            className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors font-bold"
+                                            className="px-4 py-2 text-sm font-bold text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors"
                                         >
                                             Log in
                                         </Link>
                                         {canRegister && (
                                             <Link
                                                 href="/register"
-                                                className="px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 rounded-lg transition-colors"
+                                                className="px-4 py-2 text-sm font-medium text-white bg-[#86efac] hover:bg-[#61113E] rounded-lg transition-colors"
                                             >
                                                 Get Started
                                             </Link>
@@ -295,10 +248,6 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                                 DXB Runners
                             </a>{' '}
                             &middot; Your trusted dropshipping partner for Amazon.ae products
-                            &middot;{' '}
-                            <Link href="/terms" className="text-[#a855f7] hover:underline">
-                                Terms & Conditions
-                            </Link>
                         </p>
                     </footer>
                 </div>
@@ -307,13 +256,7 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
     );
 }
 
-interface QuickActionButtonProps {
-    onClick: () => void;
-    icon: React.ReactNode;
-    label: string;
-}
-
-function QuickActionButton({ onClick, icon, label }: QuickActionButtonProps) {
+function QuickActionButton({ onClick, icon, label }) {
     return (
         <button
             type="button"

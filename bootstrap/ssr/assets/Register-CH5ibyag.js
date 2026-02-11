@@ -38,7 +38,7 @@ function Register() {
                   type: "text",
                   value: data.name,
                   onChange: (e) => setData("name", e.target.value),
-                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#811753]/20 focus:border-[#811753] transition-colors",
+                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#86efac]/20 focus:border-[#86efac] transition-colors",
                   placeholder: "Your name",
                   autoComplete: "name"
                 }
@@ -54,7 +54,7 @@ function Register() {
                   type: "email",
                   value: data.email,
                   onChange: (e) => setData("email", e.target.value),
-                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#811753]/20 focus:border-[#811753] transition-colors",
+                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#86efac]/20 focus:border-[#86efac] transition-colors",
                   placeholder: "you@example.com",
                   autoComplete: "username"
                 }
@@ -70,7 +70,7 @@ function Register() {
                   type: "password",
                   value: data.password,
                   onChange: (e) => setData("password", e.target.value),
-                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#811753]/20 focus:border-[#811753] transition-colors",
+                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#86efac]/20 focus:border-[#86efac] transition-colors",
                   placeholder: "••••••••",
                   autoComplete: "new-password"
                 }
@@ -86,7 +86,7 @@ function Register() {
                   type: "password",
                   value: data.password_confirmation,
                   onChange: (e) => setData("password_confirmation", e.target.value),
-                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#811753]/20 focus:border-[#811753] transition-colors",
+                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#86efac]/20 focus:border-[#86efac] transition-colors",
                   placeholder: "••••••••",
                   autoComplete: "new-password"
                 }
@@ -99,7 +99,7 @@ function Register() {
             {
               type: "submit",
               disabled: processing,
-              className: "w-full mt-6 px-4 py-2.5 bg-[#811753] hover:bg-[#61113E] text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+              className: "w-full mt-6 px-4 py-2.5 bg-[#86efac] hover:bg-[#61113E] text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
               children: processing ? "Creating account..." : "Create account"
             }
           )

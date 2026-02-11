@@ -38,7 +38,7 @@ function Login({ status, canResetPassword }) {
                   type: "email",
                   value: data.email,
                   onChange: (e) => setData("email", e.target.value),
-                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#811753]/20 focus:border-[#811753] transition-colors",
+                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#86efac]/20 focus:border-[#86efac] transition-colors",
                   placeholder: "you@example.com",
                   autoComplete: "username"
                 }
@@ -54,7 +54,7 @@ function Login({ status, canResetPassword }) {
                   type: "password",
                   value: data.password,
                   onChange: (e) => setData("password", e.target.value),
-                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#811753]/20 focus:border-[#811753] transition-colors",
+                  className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#86efac]/20 focus:border-[#86efac] transition-colors",
                   placeholder: "••••••••",
                   autoComplete: "current-password"
                 }
@@ -69,7 +69,7 @@ function Login({ status, canResetPassword }) {
                     type: "checkbox",
                     checked: data.remember,
                     onChange: (e) => setData("remember", e.target.checked),
-                    className: "w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-[#811753] focus:ring-[#811753]/20"
+                    className: "w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-[#86efac] focus:ring-[#86efac]/20"
                   }
                 ),
                 /* @__PURE__ */ jsx("span", { className: "text-sm text-neutral-600 dark:text-neutral-400", children: "Remember me" })
@@ -89,7 +89,7 @@ function Login({ status, canResetPassword }) {
             {
               type: "submit",
               disabled: processing,
-              className: "w-full mt-6 px-4 py-2.5 bg-[#811753] hover:bg-[#61113E] text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+              className: "w-full mt-6 px-4 py-2.5 bg-[#86efac] hover:bg-[#61113E] text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
               children: processing ? "Signing in..." : "Sign in"
             }
           )

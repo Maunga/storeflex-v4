@@ -50,7 +50,7 @@ export default function SearchResults({ auth, results, query }: SearchResultsPro
                             <span className="font-medium text-sm text-neutral-700 dark:text-neutral-300 truncate max-w-[180px]" title={auth.user.email}>
                                 {auth.user.email}
                             </span>
-                            <Link href="/logout" method="post" as="button" className="text-xs text-neutral-500 hover:text-[#811753] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors">
+                            <Link href="/logout" method="post" as="button" className="text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors">
                                 Log out
                             </Link>
                         </div>
@@ -78,7 +78,7 @@ export default function SearchResults({ auth, results, query }: SearchResultsPro
                                         value={searchQuery}
                                         onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                                         placeholder="Search for products..."
-                                        className="w-full pl-10 pr-4 py-2.5 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 outline-none focus:border-[#811753] focus:ring-2 focus:ring-[#811753]/15 transition-all"
+                                        className="w-full pl-10 pr-4 py-2.5 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 outline-none focus:border-[#86efac] focus:ring-2 focus:ring-[#86efac]/15 transition-all"
                                     />
                                     <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                         <circle cx="11" cy="11" r="8" />
@@ -93,7 +93,7 @@ export default function SearchResults({ auth, results, query }: SearchResultsPro
                     {loading && (
                         <div className="fixed inset-0 bg-white/60 dark:bg-neutral-950/60 z-50 flex items-center justify-center backdrop-blur-sm">
                             <div className="flex flex-col items-center gap-3">
-                                <div className="w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#811753] rounded-full animate-spin" />
+                                <div className="w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#86efac] rounded-full animate-spin" />
                                 <span className="text-sm text-neutral-500 dark:text-neutral-400">Fetching product details...</span>
                             </div>
                         </div>
@@ -145,7 +145,7 @@ export default function SearchResults({ auth, results, query }: SearchResultsPro
 
                                         {/* Details */}
                                         <div className="p-4 space-y-2">
-                                            <h3 className="text-sm font-medium text-neutral-900 dark:text-white leading-snug line-clamp-2 group-hover:text-[#811753] transition-colors">
+                                            <h3 className="text-sm font-medium text-neutral-900 dark:text-white leading-snug line-clamp-2 group-hover:text-[#86efac] transition-colors">
                                                 {item.title}
                                             </h3>
 

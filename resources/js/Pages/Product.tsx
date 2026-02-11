@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { PageProps, ProductData } from '@/types';
+import Lightbox from 'yet-another-react-lightbox';
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
+import 'yet-another-react-lightbox/styles.css';
+import 'yet-another-react-lightbox/plugins/thumbnails.css';
 
 interface ProductPageProps extends PageProps {
     product: ProductData;
@@ -9,6 +14,7 @@ interface ProductPageProps extends PageProps {
 
 export default function Product({ auth, product, identifier }: ProductPageProps) {
     const [selectedImage, setSelectedImage] = useState(0);
+    const [lightboxOpen, setLightboxOpen] = useState(false);
 
     const images = product.images ?? [];
     const bulletPoints = product.bullet_points
@@ -33,7 +39,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                             <span className="font-medium text-sm text-neutral-700 dark:text-neutral-300 truncate max-w-[180px]" title={auth.user.email}>
                                 {auth.user.email}
                             </span>
-                            <Link href="/logout" method="post" as="button" className="text-xs text-neutral-500 hover:text-[#811753] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors">
+                            <Link href="/logout" method="post" as="button" className="text-xs text-neutral-500 hover:text-emerald-700 dark:text-neutral-400 dark:hover:text-[#86efac] transition-colors">
                                 Log out
                             </Link>
                         </div>
@@ -74,43 +80,73 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                 </nav>
                             )}
 
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
                                 {/* Image Gallery */}
-                                <div className="space-y-4">
+                                <div className="space-y-3">
                                     {images.length > 0 && (
                                         <>
-                                            <div className="relative aspect-square bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex items-center justify-center p-6">
+                                            <div
+                                                className="relative aspect-square bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 overflow-hidden flex items-center justify-center p-6 cursor-zoom-in group"
+                                                onClick={() => setLightboxOpen(true)}
+                                            >
                                                 <img
                                                     src={images[selectedImage]}
                                                     alt={product.title}
-                                                    className="max-w-full max-h-full object-contain"
+                                                    className="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
                                                 />
+                                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
+                                                <span className="absolute bottom-4 right-4 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-neutral-500 bg-white/90 dark:bg-neutral-800/90 dark:text-neutral-400 rounded-full shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="11" y1="8" x2="11" y2="14" /><line x1="8" y1="11" x2="14" y2="11" /></svg>
+                                                    Click to zoom
+                                                </span>
                                                 {product.amazon_choice && (
-                                                    <span className="absolute top-4 left-4 px-2.5 py-1 text-xs font-semibold text-white bg-[#232F3E] rounded-md">
+                                                    <span className="absolute top-4 left-4 px-2.5 py-1 text-xs font-semibold text-white bg-[#232F3E] rounded-md shadow-sm">
                                                         Amazon's Choice
                                                     </span>
                                                 )}
                                                 {product.discount_percentage && product.discount_percentage > 0 && (
-                                                    <span className="absolute top-4 right-4 px-2.5 py-1 text-xs font-bold text-white bg-red-500 rounded-md">
+                                                    <span className="absolute top-4 right-4 px-2.5 py-1 text-xs font-bold text-white bg-red-500 rounded-md shadow-sm">
                                                         -{product.discount_percentage}%
                                                     </span>
                                                 )}
                                             </div>
-                                            <div className="flex gap-2 overflow-x-auto pb-2">
-                                                {images.slice(0, 8).map((img, i) => (
+                                            <div className="grid grid-cols-6 gap-2">
+                                                {images.slice(0, 6).map((img, i) => (
                                                     <button
                                                         key={i}
                                                         onClick={() => setSelectedImage(i)}
-                                                        className={`flex-shrink-0 w-16 h-16 rounded-lg border-2 overflow-hidden transition-all ${
+                                                        className={`aspect-square rounded-xl border-2 overflow-hidden transition-all ${
                                                             selectedImage === i
-                                                                ? 'border-[#811753] ring-2 ring-[#811753]/20'
-                                                                : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-400'
+                                                                ? 'border-emerald-500 dark:border-[#86efac] ring-2 ring-[#86efac]/20 shadow-sm'
+                                                                : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-400 dark:hover:border-neutral-500'
                                                         }`}
                                                     >
-                                                        <img src={img} alt="" className="w-full h-full object-contain bg-white dark:bg-neutral-900 p-1" />
+                                                        <img src={img} alt="" className="w-full h-full object-contain bg-white dark:bg-neutral-900 p-1.5" />
                                                     </button>
                                                 ))}
                                             </div>
+                                            {images.length > 6 && (
+                                                <button
+                                                    onClick={() => setLightboxOpen(true)}
+                                                    className="w-full text-center text-xs text-neutral-400 hover:text-emerald-700 dark:hover:text-[#86efac] transition-colors py-1"
+                                                >
+                                                    +{images.length - 6} more images
+                                                </button>
+                                            )}
+                                            <Lightbox
+                                                open={lightboxOpen}
+                                                close={() => setLightboxOpen(false)}
+                                                index={selectedImage}
+                                                slides={images.map((src) => ({ src }))}
+                                                plugins={[Zoom, Thumbnails]}
+                                                zoom={{ maxZoomPixelRatio: 4, scrollToZoom: true }}
+                                                thumbnails={{ width: 80, height: 80, borderRadius: 8 }}
+                                                on={{ view: ({ index }) => setSelectedImage(index) }}
+                                                styles={{
+                                                    container: { backgroundColor: 'rgba(0, 0, 0, 0.9)' },
+                                                }}
+                                                carousel={{ finite: images.length <= 1 }}
+                                            />
                                         </>
                                     )}
                                 </div>
@@ -119,7 +155,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                 <div className="space-y-6">
                                     {/* Brand */}
                                     {product.brand && (
-                                        <p className="text-sm font-medium text-[#811753] uppercase tracking-wide">{product.brand}</p>
+                                        <p className="text-sm font-medium text-emerald-700 dark:text-[#86efac] uppercase tracking-wide">{product.brand}</p>
                                     )}
 
                                     {/* Title */}
@@ -148,47 +184,6 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                         </div>
                                     )}
 
-                                    {/* Price Block */}
-                                    <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">
-                                        {product.price != null && product.price > 0 && product.stock !== 'Currently unavailable' ? (
-                                        <div className="flex items-baseline gap-3 flex-wrap">
-                                            {product.dxb_price && (
-                                                <div>
-                                                    <span className="text-xs text-neutral-400 block mb-0.5">DXB Runners Price</span>
-                                                    <span className="text-3xl font-bold text-[#811753]">
-                                                        ${product.dxb_price}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            <div className={product.dxb_price ? 'ml-4' : ''}>
-                                                <span className="text-xs text-neutral-400 block mb-0.5">Amazon.ae</span>
-                                                <span className="text-xl font-semibold text-neutral-700 dark:text-neutral-300">
-                                                    {product.currency ?? 'AED'} {product.price}
-                                                </span>
-                                            </div>
-                                            {product.price_strikethrough != null && product.price_strikethrough > 0 && (
-                                                <span className="text-base text-neutral-400 line-through">
-                                                    {product.currency ?? 'AED'} {product.price_strikethrough}
-                                                </span>
-                                            )}
-                                        </div>
-                                        ) : (
-                                            <p className="text-sm text-neutral-500 dark:text-neutral-400">Price unavailable</p>
-                                        )}
-
-                                        {product.is_prime_eligible && (
-                                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-1 rounded-md">
-                                                ✓ Prime Eligible
-                                            </span>
-                                        )}
-
-                                        {product.stock && (
-                                            <p className={`text-sm font-medium ${product.stock === 'In Stock' ? 'text-emerald-600' : 'text-red-500'}`}>
-                                                {product.stock}
-                                            </p>
-                                        )}
-                                    </div>
-
                                     {/* Delivery */}
                                     {delivery.length > 0 && (
                                         <div className="space-y-2">
@@ -209,7 +204,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                             <ul className="space-y-2">
                                                 {bulletPoints.map((point, i) => (
                                                     <li key={i} className="flex items-start gap-2 text-sm text-neutral-600 dark:text-neutral-400">
-                                                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#811753] flex-shrink-0" />
+                                                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-[#86efac] flex-shrink-0" />
                                                         {point}
                                                     </li>
                                                 ))}
@@ -217,18 +212,37 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                         </div>
                                     )}
 
+                                </div>
+
+                                {/* Column 3: Price & Options */}
+                                <div className="space-y-6">
+
+                                     {/* Amazon Link */}
+                                    {(product.url || product.scraped_url) && (
+                                        <a
+                                            href={product.url?.startsWith('http') ? product.url : `https://www.amazon.ae${product.url ?? ''}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-emerald-950 bg-[#86efac] hover:bg-[#6ddb94] rounded-lg transition-colors shadow-sm"
+                                        >
+                                            View on Amazon.ae
+                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+                                        </a>
+                                    )}
+
+                                    
                                     {/* Variations */}
                                     {product.variation && product.variation.length > 1 && (
-                                        <div className="space-y-2">
+                                        <div className="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3">
                                             <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Available Options</h3>
-                                            <div className="flex flex-wrap gap-2">
+                                            <div className="flex flex-col gap-2">
                                                 {product.variation.map((v) => {
                                                     const isActive = v.asin === identifier || v.selected;
                                                     const label = Object.values(v.dimensions).join(' / ');
                                                     return isActive ? (
                                                         <span
                                                             key={v.asin}
-                                                            className="px-3 py-1.5 text-sm rounded-lg border border-[#811753] bg-[#811753]/10 text-[#811753] font-medium cursor-default"
+                                                            className="px-3 py-2 text-sm rounded-lg border border-[#86efac] bg-[#86efac]/10 text-emerald-700 dark:text-[#86efac] font-medium cursor-default"
                                                             title={v.asin}
                                                         >
                                                             {label}
@@ -238,7 +252,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                                             key={v.asin}
                                                             href={`/product/${v.asin}`}
                                                             replace
-                                                            className="px-3 py-1.5 text-sm rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:border-[#811753] hover:text-[#811753] hover:bg-[#811753]/5 transition-colors"
+                                                            className="px-3 py-2 text-sm rounded-lg border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:border-[#86efac] hover:text-emerald-700 dark:hover:text-[#86efac] hover:bg-[#86efac]/5 transition-colors"
                                                             title={v.asin}
                                                         >
                                                             {label}
@@ -249,26 +263,59 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                         </div>
                                     )}
 
-                                    {/* Seller */}
-                                    {seller && (
-                                        <div className="text-sm text-neutral-500 dark:text-neutral-400 pt-2 border-t border-neutral-100 dark:border-neutral-800">
-                                            Sold by <span className="font-medium text-neutral-700 dark:text-neutral-300">{(seller as any).name ?? (seller as any).seller_name}</span>
-                                            {(seller as any).shipped_from && <> &middot; Ships from {(seller as any).shipped_from}</>}
-                                        </div>
-                                    )}
+                                    {/* Price Block */}
+                                    <div className="bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-900 dark:to-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6 space-y-4 shadow-sm">
+                                        {product.price != null && product.price > 0 && product.stock !== 'Currently unavailable' ? (
+                                        <>
+                                            {product.dxb_price && (
+                                                <div className="pb-4 border-b border-neutral-100 dark:border-neutral-700">
+                                                    <span className="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider block mb-1">Your Price (Delivered to Zimbabwe)</span>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <span className="text-4xl font-extrabold text-emerald-700 dark:text-[#86efac] tracking-tight">
+                                                            ${product.dxb_price}
+                                                        </span>
+                                                        <span className="text-sm text-neutral-400">USD</span>
+                                                    </div>
+                                                    <p className="text-xs text-neutral-400 mt-1">Includes shipping & handling</p>
+                                                </div>
+                                            )}
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <span className="text-xs text-neutral-400 block mb-0.5">Amazon.ae Price</span>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <span className="text-lg font-semibold text-neutral-600 dark:text-neutral-300">
+                                                            {product.currency ?? 'AED'} {product.price}
+                                                        </span>
+                                                        {product.price_strikethrough != null && product.price_strikethrough > 0 && (
+                                                            <span className="text-sm text-neutral-400 line-through">
+                                                                {product.currency ?? 'AED'} {product.price_strikethrough}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {product.discount_percentage && product.discount_percentage > 0 && (
+                                                    <span className="px-2.5 py-1 text-xs font-bold text-white bg-red-500 rounded-full">
+                                                        {product.discount_percentage}% OFF
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </>
+                                        ) : (
+                                            <div className="text-center py-4">
+                                                <p className="text-neutral-500 dark:text-neutral-400 font-medium">Price unavailable</p>
+                                                <p className="text-xs text-neutral-400 mt-1">Check back later or view on Amazon</p>
+                                            </div>
+                                        )}
 
-                                    {/* Amazon Link */}
-                                    {(product.url || product.scraped_url) && (
-                                        <a
-                                            href={product.url?.startsWith('http') ? product.url : `https://www.amazon.ae${product.url ?? ''}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-[#811753] hover:bg-[#61113E] rounded-lg transition-colors"
-                                        >
-                                            View on Amazon.ae
-                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-                                        </a>
-                                    )}
+                                        {product.stock && (
+                                            <div className={`flex items-center gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-700 ${product.stock === 'In Stock' ? 'text-emerald-600' : 'text-red-500'}`}>
+                                                <span className={`w-2 h-2 rounded-full ${product.stock === 'In Stock' ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
+                                                <span className="text-sm font-medium">{product.stock}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+
                                 </div>
                             </div>
 

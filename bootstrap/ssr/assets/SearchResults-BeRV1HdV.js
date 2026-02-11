@@ -31,7 +31,7 @@ function SearchResults({ auth, results, query }) {
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
       auth?.user && /* @__PURE__ */ jsx("aside", { className: "hidden lg:flex w-[260px] flex-col p-4 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800", children: [
         /* @__PURE__ */ jsx("span", { className: "font-medium text-sm text-neutral-700 dark:text-neutral-300 truncate max-w-[180px]", title: auth.user.email, children: auth.user.email }),
-        /* @__PURE__ */ jsx(Link, { href: "/logout", method: "post", as: "button", className: "text-xs text-neutral-500 hover:text-[#811753] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors", children: "Log out" })
+        /* @__PURE__ */ jsx(Link, { href: "/logout", method: "post", as: "button", className: "text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors", children: "Log out" })
       ] }) }),
       /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col min-h-screen", children: [
         /* @__PURE__ */ jsx("header", { className: "bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4 px-4 sm:px-6 py-3", children: [
@@ -48,7 +48,7 @@ function SearchResults({ auth, results, query }) {
                 value: searchQuery,
                 onChange: (e) => setSearchQuery(e.target.value),
                 placeholder: "Search for products...",
-                className: "w-full pl-10 pr-4 py-2.5 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 outline-none focus:border-[#811753] focus:ring-2 focus:ring-[#811753]/15 transition-all"
+                className: "w-full pl-10 pr-4 py-2.5 text-sm bg-neutral-50 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 outline-none focus:border-[#86efac] focus:ring-2 focus:ring-[#86efac]/15 transition-all"
               }
             ),
             /* @__PURE__ */ jsxs("svg", { className: "absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
@@ -58,7 +58,7 @@ function SearchResults({ auth, results, query }) {
           ] }) })
         ] }) }),
         loading && /* @__PURE__ */ jsx("div", { className: "fixed inset-0 bg-white/60 dark:bg-neutral-950/60 z-50 flex items-center justify-center backdrop-blur-sm", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3", children: [
-          /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#811753] rounded-full animate-spin" }),
+          /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#86efac] rounded-full animate-spin" }),
           /* @__PURE__ */ jsx("span", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: "Fetching product details..." })
         ] }) }),
         /* @__PURE__ */ jsx("main", { className: "flex-1 px-4 sm:px-6 py-6", children: /* @__PURE__ */ jsxs("div", { className: "max-w-6xl mx-auto animate-page-enter", children: [
@@ -92,7 +92,7 @@ function SearchResults({ auth, results, query }) {
                   item.best_seller && /* @__PURE__ */ jsx("span", { className: "absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-900/40 dark:text-orange-400 rounded", children: "Best Seller" })
                 ] }),
                 /* @__PURE__ */ jsxs("div", { className: "p-4 space-y-2", children: [
-                  /* @__PURE__ */ jsx("h3", { className: "text-sm font-medium text-neutral-900 dark:text-white leading-snug line-clamp-2 group-hover:text-[#811753] transition-colors", children: item.title }),
+                  /* @__PURE__ */ jsx("h3", { className: "text-sm font-medium text-neutral-900 dark:text-white leading-snug line-clamp-2 group-hover:text-[#86efac] transition-colors", children: item.title }),
                   item.rating != null && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1.5", children: [
                     /* @__PURE__ */ jsx("div", { className: "flex", children: [1, 2, 3, 4, 5].map((s) => /* @__PURE__ */ jsx("svg", { className: `w-3.5 h-3.5 ${s <= Math.round(item.rating) ? "text-yellow-400" : "text-neutral-300 dark:text-neutral-600"}`, viewBox: "0 0 20 20", fill: "currentColor", children: /* @__PURE__ */ jsx("path", { d: "M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" }) }, s)) }),
                     /* @__PURE__ */ jsxs("span", { className: "text-xs text-neutral-400", children: [

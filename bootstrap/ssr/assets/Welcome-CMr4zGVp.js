@@ -138,7 +138,7 @@ function Welcome({ auth, canLogin, canRegister }) {
     /* @__PURE__ */ jsx(Head, { title: "Your Dropshipping Assistant" }),
     /* @__PURE__ */ jsx(Toast, { message: toastMessage, type: toastType, onDismiss: () => setToastMessage(null) }),
     loading && /* @__PURE__ */ jsx("div", { className: "fixed inset-0 bg-white/60 dark:bg-neutral-950/60 z-50 flex items-center justify-center backdrop-blur-sm", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3 animate-fade-in", children: [
-      /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#811753] rounded-full animate-spin" }),
+      /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#86efac] rounded-full animate-spin" }),
       /* @__PURE__ */ jsx("span", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: "Searching..." })
     ] }) }),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
@@ -151,7 +151,7 @@ function Welcome({ auth, canLogin, canRegister }) {
               href: "/logout",
               method: "post",
               as: "button",
-              className: "text-xs text-neutral-500 hover:text-[#811753] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors",
+              className: "text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors",
               children: "Log out"
             }
           )
@@ -175,7 +175,7 @@ function Welcome({ auth, canLogin, canRegister }) {
             Link,
             {
               href: "/dashboard",
-              className: "px-4 py-2 text-sm font-medium text-white bg-[#811753] hover:bg-[#61113E] rounded-lg transition-colors",
+              className: "px-4 py-2 text-sm font-medium text-white bg-[#86efac] hover:bg-[#61113E] rounded-lg transition-colors",
               children: "Dashboard"
             }
           ) : /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -213,7 +213,7 @@ function Welcome({ auth, canLogin, canRegister }) {
             "instantly"
           ] }),
           /* @__PURE__ */ jsx("p", { className: "text-[17px] text-neutral-500 dark:text-neutral-400 mb-10 leading-relaxed animate-fade-in animation-delay-200", children: "Paste an Amazon.ae link or search for any product. We'll help you source and supply it through our dropshipping network." }),
-          /* @__PURE__ */ jsx("form", { onSubmit: handleSubmit, className: "w-full max-w-[640px] mx-auto animate-fade-in animation-delay-200", children: /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow focus-within:border-[#811753] focus-within:ring-[3px] focus-within:ring-[#811753]/15", children: [
+          /* @__PURE__ */ jsx("form", { onSubmit: handleSubmit, className: "w-full max-w-[640px] mx-auto animate-fade-in animation-delay-200", children: /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow focus-within:border-[#86efac] focus-within:ring-[3px] focus-within:ring-[#86efac]/15", children: [
             /* @__PURE__ */ jsx(
               "textarea",
               {
@@ -247,7 +247,7 @@ function Welcome({ auth, canLogin, canRegister }) {
                 "button",
                 {
                   type: "submit",
-                  className: "flex items-center justify-center w-10 h-10 bg-[#811753] hover:bg-[#61113E] text-white rounded-[10px] transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
+                  className: "flex items-center justify-center w-10 h-10 bg-[#86efac] hover:bg-[#61113E] text-white rounded-[10px] transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100",
                   disabled: !query.trim(),
                   children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
                     /* @__PURE__ */ jsx("line", { x1: "22", y1: "2", x2: "11", y2: "13" }),
@@ -317,7 +317,7 @@ function QuickActionButton({ onClick, icon, label }) {
     {
       type: "button",
       onClick,
-      className: "flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[10px] hover:border-[#811753] hover:text-[#811753] transition-colors",
+      className: "flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[10px] hover:border-[#86efac] hover:text-[#86efac] transition-colors",
       children: [
         /* @__PURE__ */ jsx("svg", { className: "w-4 h-4", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: icon }),
         label
