@@ -1,0 +1,16 @@
+{
+  "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
+  "resources/js/Pages/Auth/Login.tsx": [
+    "/build/assets/Login-CRZyWrkj.js"
+  ],
+  "resources/js/Pages/Auth/Register.tsx": [
+    "/build/assets/Register-fYcKh6-d.js"
+  ],
+  "resources/js/Pages/Dashboard.tsx": [
+    "/build/assets/Dashboard-BdD148qa.js"
+  ],
+  "resources/js/Pages/Welcome.tsx": [
+    "/build/assets/Welcome-Dg7rYSC6.js"
+  ],
+  "resources/js/ssr.tsx": []
+}
