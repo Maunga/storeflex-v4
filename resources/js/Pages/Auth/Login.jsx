@@ -60,7 +60,7 @@ export default function Login({ status, canResetPassword }) {
                                         value={data.email}
                                         onChange={(e) => setData('email', e.target.value)}
                                         className="w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#86efac]/20 focus:border-[#86efac] transition-colors"
-                                        placeholder="you@example.com"
+                                        placeholder="you@gmail.com"
                                         autoComplete="username"
                                     />
                                     {errors.email && (

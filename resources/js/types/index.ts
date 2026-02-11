@@ -120,3 +120,13 @@ export interface SearchResultItem {
     pos?: number;
     pricing_count?: number;
 }
+
+/* ── Bookmark ── */
+
+export interface Bookmark {
+    id: number;
+    img_url: string;
+    title: string;
+    price: number;
+    asin: string | null;
+}

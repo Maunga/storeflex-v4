@@ -31,21 +31,15 @@ export default function Terms({ auth }: PageProps) {
                     {/* Header */}
                     <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
                         <Link href="/" className="flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-500 flex items-center justify-center">
-                                <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                </svg>
-                            </div>
-                            Storeflex
+                            <img src="/images/logo.png" alt="Storeflex" className="h-8 w-auto" />
+                            
                         </Link>
 
                         <nav className="flex items-center gap-3">
                             {auth?.user ? (
                                 <Link
                                     href="/dashboard"
-                                    className="px-4 py-2 text-sm font-medium text-white bg-[#86efac] hover:bg-[#61113E] rounded-lg transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors"
                                 >
                                     Dashboard
                                 </Link>

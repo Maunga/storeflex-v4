@@ -35,4 +35,23 @@ class CheckoutController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+    public function agents()
+    {
+        try {
+            $client = new Client([
+                'base_uri' => 'https://www.dxbrunners.com',
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]);
+            $response = $client->get('agents.php');
+            $responseBody = $response->getBody()->getContents();
+            $agents = json_decode($responseBody, true);
+
+            return response()->json($agents ?: []);
+        } catch (GuzzleException $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

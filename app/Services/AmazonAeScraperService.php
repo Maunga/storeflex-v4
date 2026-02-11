@@ -139,13 +139,21 @@ class AmazonAeScraperService implements EcommerceScraperInterface
     private function retrieveFromCache(string $cache_key, string $url)
     {
         $retrieved_data = $this->retrieveScrapedDataFromCache($cache_key);
+        
+        // Ensure we have valid array data
+        if (!is_array($retrieved_data) || empty($retrieved_data)) {
+            // Invalid cache data, clear it and return failure
+            Cache::forget($cache_key);
+            return ['success' => false, 'message' => 'Invalid cache data', 'data' => []];
+        }
+        
         $item_weight = $this->determineWeight($retrieved_data);
-        $price = $this->calculatePrice($retrieved_data['price_upper'], $retrieved_data['price_shipping'], $item_weight);
+        $price = $this->calculatePrice($retrieved_data['price_upper'] ?? 0, $retrieved_data['price_shipping'] ?? 0, $item_weight);
 
         return [
             'success' => true,
             'message' => 'Data retrieved successfully',
-            'identifier' => $retrieved_data['asin'],
+            'identifier' => $retrieved_data['asin'] ?? null,
             'item' => array_merge($retrieved_data, [
                 'dxb_price' => $price,
                 'item_weight' => $item_weight,

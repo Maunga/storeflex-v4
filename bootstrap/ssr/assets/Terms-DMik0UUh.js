@@ -19,19 +19,12 @@ function Terms({ auth }) {
       ] }) }),
       /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col min-h-screen", children: [
         /* @__PURE__ */ jsxs("header", { className: "flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800", children: [
-          /* @__PURE__ */ jsxs(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: [
-            /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-500 flex items-center justify-center", children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 text-white", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-              /* @__PURE__ */ jsx("path", { d: "M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" }),
-              /* @__PURE__ */ jsx("line", { x1: "3", y1: "6", x2: "21", y2: "6" }),
-              /* @__PURE__ */ jsx("path", { d: "M16 10a4 4 0 0 1-8 0" })
-            ] }) }),
-            "Storeflex"
-          ] }),
+          /* @__PURE__ */ jsx(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: /* @__PURE__ */ jsx("img", { src: "/images/logo.png", alt: "Storeflex", className: "h-8 w-auto" }) }),
           /* @__PURE__ */ jsx("nav", { className: "flex items-center gap-3", children: auth?.user ? /* @__PURE__ */ jsx(
             Link,
             {
               href: "/dashboard",
-              className: "px-4 py-2 text-sm font-medium text-white bg-[#86efac] hover:bg-[#61113E] rounded-lg transition-colors",
+              className: "px-4 py-2 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors",
               children: "Dashboard"
             }
           ) : /* @__PURE__ */ jsxs(Fragment, { children: [

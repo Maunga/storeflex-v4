@@ -1,71 +1,7 @@
-import { jsx, jsxs, Fragment } from "react/jsx-runtime";
-import { useState, useEffect, useRef } from "react";
+import { jsxs, Fragment, jsx } from "react/jsx-runtime";
+import { useState, useRef, useEffect } from "react";
 import { useRemember, usePage, Head, Link, router } from "@inertiajs/react";
-function Toast({ message, type = "error", duration = 5e3, onDismiss }) {
-  const [visible, setVisible] = useState(false);
-  const [exiting, setExiting] = useState(false);
-  useEffect(() => {
-    if (message) {
-      setVisible(true);
-      setExiting(false);
-      const timer = setTimeout(() => {
-        dismiss();
-      }, duration);
-      return () => clearTimeout(timer);
-    }
-  }, [message]);
-  const dismiss = () => {
-    setExiting(true);
-    setTimeout(() => {
-      setVisible(false);
-      setExiting(false);
-      onDismiss?.();
-    }, 300);
-  };
-  if (!visible || !message) return null;
-  const bgColor = {
-    error: "bg-red-600 dark:bg-red-500",
-    success: "bg-emerald-600 dark:bg-emerald-500",
-    info: "bg-blue-600 dark:bg-blue-500"
-  }[type];
-  const icon = {
-    error: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-      /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "10" }),
-      /* @__PURE__ */ jsx("line", { x1: "15", y1: "9", x2: "9", y2: "15" }),
-      /* @__PURE__ */ jsx("line", { x1: "9", y1: "9", x2: "15", y2: "15" })
-    ] }),
-    success: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-      /* @__PURE__ */ jsx("path", { d: "M22 11.08V12a10 10 0 1 1-5.93-9.14" }),
-      /* @__PURE__ */ jsx("polyline", { points: "22 4 12 14.01 9 11.01" })
-    ] }),
-    info: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-      /* @__PURE__ */ jsx("circle", { cx: "12", cy: "12", r: "10" }),
-      /* @__PURE__ */ jsx("line", { x1: "12", y1: "16", x2: "12", y2: "12" }),
-      /* @__PURE__ */ jsx("line", { x1: "12", y1: "8", x2: "12.01", y2: "8" })
-    ] })
-  }[type];
-  return /* @__PURE__ */ jsx("div", { className: "fixed top-6 right-6 z-[9999]", children: /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: `flex items-center gap-3 px-5 py-3.5 rounded-xl shadow-2xl text-white text-sm font-medium max-w-md ${bgColor} ${exiting ? "animate-toast-exit" : "animate-toast-enter"}`,
-      children: [
-        icon,
-        /* @__PURE__ */ jsx("span", { className: "leading-snug", children: message }),
-        /* @__PURE__ */ jsx(
-          "button",
-          {
-            onClick: dismiss,
-            className: "ml-2 p-0.5 rounded-md hover:bg-white/20 transition-colors flex-shrink-0",
-            children: /* @__PURE__ */ jsxs("svg", { className: "w-4 h-4", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
-              /* @__PURE__ */ jsx("line", { x1: "18", y1: "6", x2: "6", y2: "18" }),
-              /* @__PURE__ */ jsx("line", { x1: "6", y1: "6", x2: "18", y2: "18" })
-            ] })
-          }
-        )
-      ]
-    }
-  ) });
-}
+import { T as Toast } from "./Toast-2CzZTQ7I.js";
 const marketingStatements = [
   { text: "Amazon.ae" },
   { text: "any product name" },
@@ -78,11 +14,13 @@ function Welcome({ auth, canLogin, canRegister }) {
   const { toast } = usePage().props;
   const [toastMessage, setToastMessage] = useState(null);
   const [toastType, setToastType] = useState("error");
+  const shownToastRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   useEffect(() => {
-    if (toast) {
+    if (toast && toast.message && toast.message !== shownToastRef.current) {
+      shownToastRef.current = toast.message;
       setToastType(toast.type ?? "error");
       setToastMessage(toast.message);
     }
@@ -138,7 +76,7 @@ function Welcome({ auth, canLogin, canRegister }) {
     /* @__PURE__ */ jsx(Head, { title: "Your Dropshipping Assistant" }),
     /* @__PURE__ */ jsx(Toast, { message: toastMessage, type: toastType, onDismiss: () => setToastMessage(null) }),
     loading && /* @__PURE__ */ jsx("div", { className: "fixed inset-0 bg-white/60 dark:bg-neutral-950/60 z-50 flex items-center justify-center backdrop-blur-sm", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3 animate-fade-in", children: [
-      /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#86efac] rounded-full animate-spin" }),
+      /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-neutral-200 border-t-[#86efac] rounded-full animate-spin" }),
       /* @__PURE__ */ jsx("span", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: "Searching..." })
     ] }) }),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
@@ -163,19 +101,12 @@ function Welcome({ auth, canLogin, canRegister }) {
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col min-h-screen", children: [
         /* @__PURE__ */ jsxs("header", { className: "flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800", children: [
-          /* @__PURE__ */ jsxs(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: [
-            /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-500 flex items-center justify-center", children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 text-white", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-              /* @__PURE__ */ jsx("path", { d: "M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" }),
-              /* @__PURE__ */ jsx("line", { x1: "3", y1: "6", x2: "21", y2: "6" }),
-              /* @__PURE__ */ jsx("path", { d: "M16 10a4 4 0 0 1-8 0" })
-            ] }) }),
-            "Storeflex"
-          ] }),
+          /* @__PURE__ */ jsx(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: /* @__PURE__ */ jsx("img", { src: "/images/logo.png", alt: "Storeflex", className: "h-8 w-auto" }) }),
           canLogin && /* @__PURE__ */ jsx("nav", { className: "flex items-center gap-3", children: auth?.user ? /* @__PURE__ */ jsx(
             Link,
             {
               href: "/dashboard",
-              className: "px-4 py-2 text-sm font-medium text-white bg-[#86efac] hover:bg-[#61113E] rounded-lg transition-colors",
+              className: "px-4 py-2 text-sm font-medium text-white bg-[#000000] hover:bg-[#111111] rounded-lg transition-colors",
               children: "Dashboard"
             }
           ) : /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -198,10 +129,6 @@ function Welcome({ auth, canLogin, canRegister }) {
           ] }) })
         ] }),
         /* @__PURE__ */ jsx("main", { className: "flex-1 flex flex-col items-center justify-center px-6 py-10 text-center", children: /* @__PURE__ */ jsxs("div", { className: "max-w-[720px] w-full animate-fade-in", children: [
-          /* @__PURE__ */ jsxs("span", { className: "inline-flex items-center gap-1.5 px-3 py-1.5 mb-6 text-[13px] font-medium text-[#eab308] bg-[#eab308]/10 rounded-full animate-fade-in animation-delay-100", children: [
-            /* @__PURE__ */ jsx("svg", { width: "14", height: "14", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ jsx("polygon", { points: "13 2 3 14 12 14 11 22 21 10 12 10 13 2" }) }),
-            "Powered by DXB Runners"
-          ] }),
           /* @__PURE__ */ jsxs("h1", { className: "text-4xl sm:text-5xl font-bold leading-tight tracking-tight mb-4 text-neutral-900 dark:text-white animate-fade-in animation-delay-100", children: [
             "Find products from",
             /* @__PURE__ */ jsx("br", {}),

@@ -558,7 +558,6 @@
                                 <path d="M16 10a4 4 0 0 1-8 0"></path>
                             </svg>
                         </div>
-                        Storeflex
                     </a>
 
                     @if (Route::has('login'))
@@ -584,12 +583,12 @@
                 <!-- Hero Section -->
                 <main class="hero">
                     <div class="hero-content animate-fade-in">
-                        <span class="hero-badge animate-fade-in animate-delay-1">
+                        {{-- <span class="hero-badge animate-fade-in animate-delay-1">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                             </svg>
                             Powered by DXB Runners
-                        </span>
+                        </span> --}}
 
                         <h1 class="hero-title animate-fade-in animate-delay-1">
                             Find products from<br>

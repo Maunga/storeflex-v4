@@ -1,37 +1,46 @@
 {
   "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
   "node_modules/yet-another-react-lightbox/dist/plugins/thumbnails/thumbnails.css": [
-    "/build/assets/Product-jVYts9wR.js",
+    "/build/assets/Product-BQYrz8cI.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "node_modules/yet-another-react-lightbox/dist/styles.css": [
-    "/build/assets/Product-jVYts9wR.js",
+    "/build/assets/Product-BQYrz8cI.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "resources/js/Components/Toast.tsx": [
-    "/build/assets/Welcome-CMr4zGVp.js"
+    "/build/assets/Toast-2CzZTQ7I.js"
+  ],
+  "resources/js/Pages/Auth/ForgotPassword.tsx": [
+    "/build/assets/ForgotPassword-DghwoXVK.js"
   ],
   "resources/js/Pages/Auth/Login.tsx": [
-    "/build/assets/Login-B7IJkoBB.js"
+    "/build/assets/Login-CKzdgIkH.js"
   ],
   "resources/js/Pages/Auth/Register.tsx": [
-    "/build/assets/Register-CH5ibyag.js"
+    "/build/assets/Register-DnRTAzLg.js"
+  ],
+  "resources/js/Pages/Checkout.tsx": [
+    "/build/assets/Checkout-C2ip4RnS.js"
   ],
   "resources/js/Pages/Dashboard.tsx": [
-    "/build/assets/Dashboard-CkX9XKvM.js"
+    "/build/assets/Dashboard-FlNMyvYT.js"
   ],
   "resources/js/Pages/Product.tsx": [
-    "/build/assets/Product-jVYts9wR.js",
+    "/build/assets/Product-BQYrz8cI.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
+  "resources/js/Pages/Profile.tsx": [
+    "/build/assets/Profile-B2UNc_rF.js"
+  ],
   "resources/js/Pages/SearchResults.tsx": [
-    "/build/assets/SearchResults-BeRV1HdV.js"
+    "/build/assets/SearchResults-iymSVk0P.js"
   ],
   "resources/js/Pages/Terms.tsx": [
-    "/build/assets/Terms-D9ZGLYql.js"
+    "/build/assets/Terms-DMik0UUh.js"
   ],
   "resources/js/Pages/Welcome.tsx": [
-    "/build/assets/Welcome-CMr4zGVp.js"
+    "/build/assets/Welcome-C6uIKGIa.js"
   ],
   "resources/js/ssr.tsx": []
 }

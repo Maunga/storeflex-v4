@@ -1,42 +1,146 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Head, Link } from "@inertiajs/react";
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
-function Product({ auth, product, identifier }) {
+import { T as Toast } from "./Toast-2CzZTQ7I.js";
+import axios from "axios";
+function Product({ auth, product, identifier, canLogin, canRegister }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [toastMessage, setToastMessage] = useState(null);
+  const [toastType, setToastType] = useState("info");
+  useEffect(() => {
+    if (auth?.user) {
+      axios.get("/bookmarks").then((res) => {
+        setBookmarks(res.data);
+        const found = res.data.some((b) => b.asin === identifier);
+        setIsBookmarked(found);
+      }).catch(() => {
+      });
+    }
+  }, [auth?.user, identifier]);
+  const handleBookmark = async () => {
+    if (!auth?.user) {
+      setToastType("info");
+      setToastMessage("Please log in to save bookmarks");
+      setTimeout(() => {
+      }, 1500);
+      return;
+    }
+    setBookmarkLoading(true);
+    try {
+      if (isBookmarked) {
+        await axios.delete("/bookmarks", { data: { asin: identifier } });
+        setBookmarks((prev) => prev.filter((b) => b.asin !== identifier));
+        setIsBookmarked(false);
+      } else {
+        const res = await axios.post("/bookmarks", {
+          img_url: product.images?.[0] ?? "",
+          title: product.title ?? "Unknown Product",
+          price: product.dxb_price ? parseFloat(product.dxb_price) : product.price ?? 0,
+          asin: identifier
+        });
+        if (res.data.success) {
+          setBookmarks((prev) => [res.data.bookmark, ...prev]);
+          setIsBookmarked(true);
+        }
+      }
+    } catch (error) {
+      if (error.response?.status === 409) {
+        setIsBookmarked(true);
+      }
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
   const images = product.images ?? [];
   const bulletPoints = product.bullet_points ? product.bullet_points.split("\n").filter(Boolean) : [];
   const categories = product.category?.[0]?.ladder?.map((c) => c.name) ?? [];
-  const delivery = product.delivery ?? product.buybox?.[0]?.delivery_details ?? [];
-  const seller = product.featured_merchant ?? product.buybox?.[0] ?? null;
+  product.delivery ?? product.buybox?.[0]?.delivery_details ?? [];
+  product.featured_merchant ?? product.buybox?.[0] ?? null;
   const reviews = product.reviews?.slice(0, 6) ?? [];
   const stars = product.rating_stars_distribution ?? [];
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(Head, { title: product.title ?? "Product" }),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
-      auth?.user && /* @__PURE__ */ jsx("aside", { className: "hidden lg:flex w-[260px] flex-col p-4 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800", children: [
-        /* @__PURE__ */ jsx("span", { className: "font-medium text-sm text-neutral-700 dark:text-neutral-300 truncate max-w-[180px]", title: auth.user.email, children: auth.user.email }),
-        /* @__PURE__ */ jsx(Link, { href: "/logout", method: "post", as: "button", className: "text-xs text-neutral-500 hover:text-emerald-700 dark:text-neutral-400 dark:hover:text-[#86efac] transition-colors", children: "Log out" })
-      ] }) }),
+      auth?.user && /* @__PURE__ */ jsxs("aside", { className: "hidden lg:flex w-[260px] flex-col p-4 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800", children: [
+          /* @__PURE__ */ jsx("span", { className: "font-medium text-sm text-neutral-700 dark:text-neutral-300 truncate max-w-[180px]", title: auth.user.email, children: auth.user.email }),
+          /* @__PURE__ */ jsx(Link, { href: "/logout", method: "post", as: "button", className: "text-xs text-neutral-500 hover:text-emerald-700 dark:text-neutral-400 dark:hover:text-[#86efac] transition-colors", children: "Log out" })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex-1 overflow-y-auto", children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3", children: "Bookmarks" }),
+          bookmarks.length > 0 ? /* @__PURE__ */ jsx("div", { className: "space-y-2", children: bookmarks.map((bookmark) => /* @__PURE__ */ jsxs(
+            Link,
+            {
+              href: bookmark.asin ? `/product/${bookmark.asin}` : "#",
+              className: `flex items-center gap-3 p-2 rounded-lg transition-colors ${bookmark.asin === identifier ? "bg-[#86efac]/10 border border-[#86efac]/30" : "hover:bg-neutral-100 dark:hover:bg-neutral-800"}`,
+              children: [
+                /* @__PURE__ */ jsx(
+                  "img",
+                  {
+                    src: bookmark.img_url,
+                    alt: "",
+                    className: "w-10 h-10 object-contain rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                  }
+                ),
+                /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+                  /* @__PURE__ */ jsx("p", { className: "text-xs text-neutral-700 dark:text-neutral-300 line-clamp-2 leading-tight", children: bookmark.title }),
+                  /* @__PURE__ */ jsxs("p", { className: "text-xs font-medium text-emerald-600 dark:text-[#86efac] mt-0.5", children: [
+                    "$",
+                    bookmark.price
+                  ] })
+                ] })
+              ]
+            },
+            bookmark.id
+          )) }) : /* @__PURE__ */ jsxs("div", { className: "text-center py-8 text-neutral-400 dark:text-neutral-500", children: [
+            /* @__PURE__ */ jsx("svg", { className: "w-10 h-10 mx-auto mb-2 opacity-50", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsx("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }) }),
+            /* @__PURE__ */ jsx("p", { className: "text-xs", children: "No bookmarks yet" })
+          ] })
+        ] })
+      ] }),
       /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col min-h-screen", children: [
         /* @__PURE__ */ jsxs("header", { className: "flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800", children: [
-          /* @__PURE__ */ jsxs(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: [
-            /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-500 flex items-center justify-center", children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 text-white", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-              /* @__PURE__ */ jsx("path", { d: "M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" }),
-              /* @__PURE__ */ jsx("line", { x1: "3", y1: "6", x2: "21", y2: "6" }),
-              /* @__PURE__ */ jsx("path", { d: "M16 10a4 4 0 0 1-8 0" })
-            ] }) }),
-            "Storeflex"
-          ] }),
-          /* @__PURE__ */ jsxs(Link, { href: "/", className: "flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors", children: [
-            /* @__PURE__ */ jsxs("svg", { className: "w-4 h-4", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
-              /* @__PURE__ */ jsx("line", { x1: "19", y1: "12", x2: "5", y2: "12" }),
-              /* @__PURE__ */ jsx("polyline", { points: "12 19 5 12 12 5" })
+          /* @__PURE__ */ jsx(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: /* @__PURE__ */ jsx("img", { src: "/images/logo.png", alt: "Storeflex", className: "h-8 w-auto" }) }),
+          canLogin && /* @__PURE__ */ jsxs("nav", { className: "flex items-center gap-3", children: [
+            /* @__PURE__ */ jsxs(Link, { href: "/", className: "flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors", children: [
+              /* @__PURE__ */ jsxs("svg", { className: "w-4 h-4", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
+                /* @__PURE__ */ jsx("line", { x1: "19", y1: "12", x2: "5", y2: "12" }),
+                /* @__PURE__ */ jsx("polyline", { points: "12 19 5 12 12 5" })
+              ] }),
+              "New Search"
             ] }),
-            "New Search"
+            auth?.user ? /* @__PURE__ */ jsx(
+              Link,
+              {
+                href: "/dashboard",
+                className: "px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 rounded-lg transition-colors",
+                children: "Dashboard"
+              }
+            ) : /* @__PURE__ */ jsxs(Fragment, { children: [
+              /* @__PURE__ */ jsx(
+                Link,
+                {
+                  href: "/login",
+                  className: "px-4 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors font-bold",
+                  children: "Log in"
+                }
+              ),
+              canRegister && /* @__PURE__ */ jsx(
+                Link,
+                {
+                  href: "/register",
+                  className: "px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 rounded-lg transition-colors",
+                  children: "Get Started"
+                }
+              )
+            ] })
           ] })
         ] }),
         /* @__PURE__ */ jsx("main", { className: "flex-1 px-4 sm:px-6 py-8 sm:py-10", children: /* @__PURE__ */ jsxs("div", { className: "max-w-6xl mx-auto animate-page-enter", children: [
@@ -44,8 +148,8 @@ function Product({ auth, product, identifier }) {
             i > 0 && /* @__PURE__ */ jsx("span", { children: "/" }),
             /* @__PURE__ */ jsx("span", { className: "hover:text-neutral-600 dark:hover:text-neutral-300", children: cat })
           ] }, i)) }),
-          /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10", children: [
-            /* @__PURE__ */ jsx("div", { className: "space-y-3", children: images.length > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-start", children: [
+            /* @__PURE__ */ jsx("div", { className: "space-y-3 animate-fade-in-up lg:sticky lg:top-24", children: images.length > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
               /* @__PURE__ */ jsxs(
                 "div",
                 {
@@ -118,7 +222,7 @@ function Product({ auth, product, identifier }) {
                 }
               )
             ] }) }),
-            /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
+            /* @__PURE__ */ jsxs("div", { className: "space-y-6 animate-fade-in-up animate-delay-100", children: [
               product.brand && /* @__PURE__ */ jsx("p", { className: "text-sm font-medium text-emerald-700 dark:text-[#86efac] uppercase tracking-wide", children: product.brand }),
               /* @__PURE__ */ jsx("h1", { className: "text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white leading-snug", children: product.title }),
               product.rating != null && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
@@ -130,22 +234,6 @@ function Product({ auth, product, identifier }) {
                   " reviews)"
                 ] })
               ] }),
-              delivery.length > 0 && /* @__PURE__ */ jsxs("div", { className: "space-y-2", children: [
-                /* @__PURE__ */ jsx("h3", { className: "text-sm font-semibold text-neutral-700 dark:text-neutral-300", children: "Delivery" }),
-                delivery.map((d, i) => /* @__PURE__ */ jsxs("div", { className: "flex items-start gap-2 text-sm text-neutral-500 dark:text-neutral-400", children: [
-                  /* @__PURE__ */ jsxs("svg", { className: "w-4 h-4 mt-0.5 text-emerald-500 flex-shrink-0", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
-                    /* @__PURE__ */ jsx("rect", { x: "1", y: "3", width: "15", height: "13" }),
-                    /* @__PURE__ */ jsx("polygon", { points: "16 8 20 8 23 11 23 16 16 16 16 8" }),
-                    /* @__PURE__ */ jsx("circle", { cx: "5.5", cy: "18.5", r: "2.5" }),
-                    /* @__PURE__ */ jsx("circle", { cx: "18.5", cy: "18.5", r: "2.5" })
-                  ] }),
-                  /* @__PURE__ */ jsxs("span", { children: [
-                    /* @__PURE__ */ jsx("strong", { className: "text-neutral-700 dark:text-neutral-200", children: d.type }),
-                    " — ",
-                    d.date?.by
-                  ] })
-                ] }, i))
-              ] }),
               bulletPoints.length > 0 && /* @__PURE__ */ jsxs("div", { className: "space-y-2", children: [
                 /* @__PURE__ */ jsx("h3", { className: "text-sm font-semibold text-neutral-700 dark:text-neutral-300", children: "About this item" }),
                 /* @__PURE__ */ jsx("ul", { className: "space-y-2", children: bulletPoints.map((point, i) => /* @__PURE__ */ jsxs("li", { className: "flex items-start gap-2 text-sm text-neutral-600 dark:text-neutral-400", children: [
@@ -154,32 +242,39 @@ function Product({ auth, product, identifier }) {
                 ] }, i)) })
               ] })
             ] }),
-            /* @__PURE__ */ jsxs("div", { className: "space-y-6", children: [
-              /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3", children: [
-                product.price != null && product.price > 0 && product.stock !== "Currently unavailable" ? /* @__PURE__ */ jsxs("div", { className: "flex items-baseline gap-3 flex-wrap", children: [
-                  product.dxb_price && /* @__PURE__ */ jsxs("div", { children: [
-                    /* @__PURE__ */ jsx("span", { className: "text-xs text-neutral-400 block mb-0.5", children: "DXB Runners Price" }),
-                    /* @__PURE__ */ jsxs("span", { className: "text-3xl font-bold text-emerald-700 dark:text-[#86efac]", children: [
-                      "$",
-                      product.dxb_price
+            /* @__PURE__ */ jsxs("div", { className: "space-y-6 animate-fade-in-up animate-delay-200 lg:sticky lg:top-24", children: [
+              /* @__PURE__ */ jsxs(
+                "button",
+                {
+                  onClick: handleBookmark,
+                  disabled: bookmarkLoading,
+                  className: `w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg transition-colors ${isBookmarked ? "bg-[#86efac]/20 text-emerald-700 dark:text-[#86efac] border-2 border-[#86efac]" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 border-2 border-transparent"} ${bookmarkLoading ? "opacity-50 cursor-not-allowed" : ""}`,
+                  children: [
+                    bookmarkLoading ? /* @__PURE__ */ jsxs("svg", { className: "w-4 h-4 animate-spin", viewBox: "0 0 24 24", fill: "none", children: [
+                      /* @__PURE__ */ jsx("circle", { className: "opacity-25", cx: "12", cy: "12", r: "10", stroke: "currentColor", strokeWidth: "4" }),
+                      /* @__PURE__ */ jsx("path", { className: "opacity-75", fill: "currentColor", d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" })
+                    ] }) : /* @__PURE__ */ jsx("svg", { className: `w-4 h-4 ${isBookmarked ? "fill-current" : ""}`, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: /* @__PURE__ */ jsx("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }) }),
+                    isBookmarked ? "Bookmarked" : "Add Bookmark"
+                  ]
+                }
+              ),
+              (product.url || product.scraped_url) && /* @__PURE__ */ jsxs(
+                "a",
+                {
+                  href: product.url?.startsWith("http") ? product.url : `https://www.amazon.ae${product.url ?? ""}`,
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  className: "w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-emerald-700 dark:text-[#86efac] border-2 border-emerald-600 dark:border-[#86efac] hover:bg-emerald-50 dark:hover:bg-[#86efac]/10 rounded-lg transition-colors",
+                  children: [
+                    "View on Amazon.ae",
+                    /* @__PURE__ */ jsxs("svg", { className: "w-4 h-4", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
+                      /* @__PURE__ */ jsx("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }),
+                      /* @__PURE__ */ jsx("polyline", { points: "15 3 21 3 21 9" }),
+                      /* @__PURE__ */ jsx("line", { x1: "10", y1: "14", x2: "21", y2: "3" })
                     ] })
-                  ] }),
-                  /* @__PURE__ */ jsxs("div", { className: product.dxb_price ? "ml-4" : "", children: [
-                    /* @__PURE__ */ jsx("span", { className: "text-xs text-neutral-400 block mb-0.5", children: "Amazon.ae" }),
-                    /* @__PURE__ */ jsxs("span", { className: "text-xl font-semibold text-neutral-700 dark:text-neutral-300", children: [
-                      product.currency ?? "AED",
-                      " ",
-                      product.price
-                    ] })
-                  ] }),
-                  product.price_strikethrough != null && product.price_strikethrough > 0 && /* @__PURE__ */ jsxs("span", { className: "text-base text-neutral-400 line-through", children: [
-                    product.currency ?? "AED",
-                    " ",
-                    product.price_strikethrough
-                  ] })
-                ] }) : /* @__PURE__ */ jsx("p", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: "Price unavailable" }),
-                product.stock && /* @__PURE__ */ jsx("p", { className: `text-sm font-medium ${product.stock === "In Stock" ? "text-emerald-600" : "text-red-500"}`, children: product.stock })
-              ] }),
+                  ]
+                }
+              ),
               product.variation && product.variation.length > 1 && /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5 space-y-3", children: [
                 /* @__PURE__ */ jsx("h3", { className: "text-sm font-semibold text-neutral-700 dark:text-neutral-300", children: "Available Options" }),
                 /* @__PURE__ */ jsx("div", { className: "flex flex-col gap-2", children: product.variation.map((v) => {
@@ -206,31 +301,61 @@ function Product({ auth, product, identifier }) {
                   );
                 }) })
               ] }),
-              seller && /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-5", children: [
-                /* @__PURE__ */ jsx("h3", { className: "text-sm font-semibold text-neutral-700 dark:text-neutral-300 mb-2", children: "Seller Information" }),
-                /* @__PURE__ */ jsxs("p", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: [
-                  "Sold by ",
-                  /* @__PURE__ */ jsx("span", { className: "font-medium text-neutral-700 dark:text-neutral-300", children: seller.name ?? seller.seller_name }),
-                  seller.shipped_from && /* @__PURE__ */ jsxs(Fragment, { children: [
-                    " · Ships from ",
-                    seller.shipped_from
+              /* @__PURE__ */ jsxs("div", { className: "bg-gradient-to-br from-white to-neutral-50 dark:from-neutral-900 dark:to-neutral-800/50 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-6 space-y-4 shadow-sm", children: [
+                product.price != null && product.price > 0 && product.stock !== "Currently unavailable" ? /* @__PURE__ */ jsxs(Fragment, { children: [
+                  product.dxb_price && /* @__PURE__ */ jsxs("div", { className: "pb-4 border-b border-neutral-100 dark:border-neutral-700", children: [
+                    /* @__PURE__ */ jsx("span", { className: "text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider block mb-1", children: "Your Price (Delivered to Zimbabwe)" }),
+                    /* @__PURE__ */ jsxs("div", { className: "flex items-baseline gap-2", children: [
+                      /* @__PURE__ */ jsxs("span", { className: "text-4xl font-extrabold text-emerald-700 dark:text-[#86efac] tracking-tight", children: [
+                        "$",
+                        product.dxb_price
+                      ] }),
+                      /* @__PURE__ */ jsx("span", { className: "text-sm text-neutral-400", children: "USD" })
+                    ] }),
+                    /* @__PURE__ */ jsx("p", { className: "text-xs text-neutral-400 mt-1", children: "Includes shipping & handling" })
+                  ] }),
+                  /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
+                    /* @__PURE__ */ jsxs("div", { children: [
+                      /* @__PURE__ */ jsx("span", { className: "text-xs text-neutral-400 block mb-0.5", children: "Amazon.ae Price" }),
+                      /* @__PURE__ */ jsxs("div", { className: "flex items-baseline gap-2", children: [
+                        /* @__PURE__ */ jsxs("span", { className: "text-lg font-semibold text-neutral-600 dark:text-neutral-300", children: [
+                          product.currency ?? "AED",
+                          " ",
+                          product.price
+                        ] }),
+                        product.price_strikethrough != null && product.price_strikethrough > 0 && /* @__PURE__ */ jsxs("span", { className: "text-sm text-neutral-400 line-through", children: [
+                          product.currency ?? "AED",
+                          " ",
+                          product.price_strikethrough
+                        ] })
+                      ] })
+                    ] }),
+                    product.discount_percentage && product.discount_percentage > 0 && /* @__PURE__ */ jsxs("span", { className: "px-2.5 py-1 text-xs font-bold text-white bg-red-500 rounded-full", children: [
+                      product.discount_percentage,
+                      "% OFF"
+                    ] })
                   ] })
+                ] }) : /* @__PURE__ */ jsxs("div", { className: "text-center py-4", children: [
+                  /* @__PURE__ */ jsx("p", { className: "text-neutral-500 dark:text-neutral-400 font-medium", children: "Price unavailable" }),
+                  /* @__PURE__ */ jsx("p", { className: "text-xs text-neutral-400 mt-1", children: "Check back later or view on Amazon" })
+                ] }),
+                product.stock && /* @__PURE__ */ jsxs("div", { className: `flex items-center gap-2 pt-3 border-t border-neutral-100 dark:border-neutral-700 ${product.stock === "In Stock" ? "text-emerald-600" : "text-red-500"}`, children: [
+                  /* @__PURE__ */ jsx("span", { className: `w-2 h-2 rounded-full ${product.stock === "In Stock" ? "bg-emerald-500 animate-pulse" : "bg-red-500"}` }),
+                  /* @__PURE__ */ jsx("span", { className: "text-sm font-medium", children: product.stock })
                 ] })
               ] }),
-              (product.url || product.scraped_url) && /* @__PURE__ */ jsxs(
-                "a",
+              /* @__PURE__ */ jsxs(
+                Link,
                 {
-                  href: product.url?.startsWith("http") ? product.url : `https://www.amazon.ae${product.url ?? ""}`,
-                  target: "_blank",
-                  rel: "noopener noreferrer",
-                  className: "w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-emerald-950 bg-[#86efac] hover:bg-[#6ddb94] rounded-lg transition-colors shadow-sm",
+                  href: `/checkout/${identifier}`,
+                  className: "w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:text-neutral-900 dark:hover:bg-emerald-400 rounded-lg transition-colors shadow-sm",
                   children: [
-                    "View on Amazon.ae",
-                    /* @__PURE__ */ jsxs("svg", { className: "w-4 h-4", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
-                      /* @__PURE__ */ jsx("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }),
-                      /* @__PURE__ */ jsx("polyline", { points: "15 3 21 3 21 9" }),
-                      /* @__PURE__ */ jsx("line", { x1: "10", y1: "14", x2: "21", y2: "3" })
-                    ] })
+                    /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
+                      /* @__PURE__ */ jsx("circle", { cx: "9", cy: "21", r: "1" }),
+                      /* @__PURE__ */ jsx("circle", { cx: "20", cy: "21", r: "1" }),
+                      /* @__PURE__ */ jsx("path", { d: "M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" })
+                    ] }),
+                    "Buy Now"
                   ]
                 }
               )
@@ -285,7 +410,15 @@ function Product({ auth, product, identifier }) {
           /* @__PURE__ */ jsx(Link, { href: "/terms", className: "text-[#a855f7] hover:underline", children: "Terms & Conditions" })
         ] }) })
       ] })
-    ] })
+    ] }),
+    /* @__PURE__ */ jsx(
+      Toast,
+      {
+        message: toastMessage,
+        type: toastType,
+        onDismiss: () => setToastMessage(null)
+      }
+    )
   ] });
 }
 export {

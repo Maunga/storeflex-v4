@@ -102,7 +102,6 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                                     <path d="M16 10a4 4 0 0 1-8 0"></path>
                                 </svg>
                             </div>
-                            Storeflex
                         </Link>
 
                         {canLogin && (
@@ -110,7 +109,7 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                                 {auth?.user ? (
                                     <Link
                                         href="/dashboard"
-                                        className="px-4 py-2 text-sm font-medium text-white bg-[#86efac] hover:bg-[#61113E] rounded-lg transition-colors"
+                                        className="px-4 py-2 text-sm font-medium text-white bg-[#000000] hover:bg-[#111111] rounded-lg transition-colors"
                                     >
                                         Dashboard
                                     </Link>
@@ -139,12 +138,12 @@ export default function Welcome({ auth, canLogin, canRegister }) {
                     {/* Hero Section */}
                     <main className="flex-1 flex flex-col items-center justify-center px-6 py-10 text-center">
                         <div className="max-w-[720px] w-full animate-fade-in">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 mb-6 text-[13px] font-medium text-[#eab308] bg-[#eab308]/10 rounded-full animate-fade-in animation-delay-100">
+                            {/* <span className="inline-flex items-center gap-1.5 px-3 py-1.5 mb-6 text-[13px] font-medium text-[#eab308] bg-[#eab308]/10 rounded-full animate-fade-in animation-delay-100">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                                 </svg>
                                 Powered by DXB Runners
-                            </span>
+                            </span> */}
 
                             <h1 className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight mb-4 text-neutral-900 dark:text-white animate-fade-in animation-delay-100">
                                 Find products from<br />

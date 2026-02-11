@@ -1,6 +1,7 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
 import { Head, Link } from "@inertiajs/react";
+import axios from "axios";
 const getGreeting = () => {
   const hour = (/* @__PURE__ */ new Date()).getHours();
   if (hour < 12) return "Good morning";
@@ -9,9 +10,14 @@ const getGreeting = () => {
 };
 function Dashboard({ auth }) {
   const [greeting, setGreeting] = useState("Welcome");
+  const [bookmarks, setBookmarks] = useState([]);
   useEffect(() => {
     setGreeting(getGreeting());
-  }, []);
+    if (auth?.user) {
+      axios.get("/bookmarks").then((res) => setBookmarks(res.data)).catch(() => {
+      });
+    }
+  }, [auth?.user]);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(Head, { title: "Dashboard" }),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
@@ -24,26 +30,46 @@ function Dashboard({ auth }) {
               href: "/logout",
               method: "post",
               as: "button",
-              className: "text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors",
+              className: "text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-[#86efac] transition-colors",
               children: "Log out"
             }
           )
         ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col items-center justify-center text-center p-6 text-neutral-500 dark:text-neutral-400", children: [
-          /* @__PURE__ */ jsx("svg", { className: "w-12 h-12 mb-3 opacity-40", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsx("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) }),
-          /* @__PURE__ */ jsx("p", { className: "text-[13px] leading-relaxed", children: "Your search history will appear here." })
+        /* @__PURE__ */ jsxs("div", { className: "flex-1 overflow-y-auto", children: [
+          /* @__PURE__ */ jsx("h3", { className: "text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3", children: "Bookmarks" }),
+          bookmarks.length > 0 ? /* @__PURE__ */ jsx("div", { className: "space-y-2", children: bookmarks.map((bookmark) => /* @__PURE__ */ jsxs(
+            Link,
+            {
+              href: bookmark.asin ? `/product/${bookmark.asin}` : "#",
+              className: "flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors",
+              children: [
+                /* @__PURE__ */ jsx(
+                  "img",
+                  {
+                    src: bookmark.img_url,
+                    alt: "",
+                    className: "w-10 h-10 object-contain rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                  }
+                ),
+                /* @__PURE__ */ jsxs("div", { className: "flex-1 min-w-0", children: [
+                  /* @__PURE__ */ jsx("p", { className: "text-xs text-neutral-700 dark:text-neutral-300 line-clamp-2 leading-tight", children: bookmark.title }),
+                  /* @__PURE__ */ jsxs("p", { className: "text-xs font-medium text-emerald-600 dark:text-[#86efac] mt-0.5", children: [
+                    "$",
+                    bookmark.price
+                  ] })
+                ] })
+              ]
+            },
+            bookmark.id
+          )) }) : /* @__PURE__ */ jsxs("div", { className: "text-center py-8 text-neutral-400 dark:text-neutral-500", children: [
+            /* @__PURE__ */ jsx("svg", { className: "w-10 h-10 mx-auto mb-2 opacity-50", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsx("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }) }),
+            /* @__PURE__ */ jsx("p", { className: "text-xs", children: "No bookmarks yet" })
+          ] })
         ] })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col min-h-screen", children: [
         /* @__PURE__ */ jsxs("header", { className: "flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800", children: [
-          /* @__PURE__ */ jsxs(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: [
-            /* @__PURE__ */ jsx("div", { className: "w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-500 flex items-center justify-center", children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 text-white", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-              /* @__PURE__ */ jsx("path", { d: "M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" }),
-              /* @__PURE__ */ jsx("line", { x1: "3", y1: "6", x2: "21", y2: "6" }),
-              /* @__PURE__ */ jsx("path", { d: "M16 10a4 4 0 0 1-8 0" })
-            ] }) }),
-            "Storeflex"
-          ] }),
+          /* @__PURE__ */ jsx(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: /* @__PURE__ */ jsx("img", { src: "/images/logo.png", alt: "Storeflex", className: "h-8 w-auto" }) }),
           /* @__PURE__ */ jsxs("nav", { className: "flex items-center gap-3", children: [
             /* @__PURE__ */ jsx(
               Link,

@@ -20,7 +20,7 @@ createServer(
     title: (title) => `${title} - ${appName}`,
     resolve: (name) => resolvePageComponent(
       `./Pages/${name}.tsx`,
-      /* @__PURE__ */ Object.assign({ "./Pages/Auth/Login.tsx": () => import("./assets/Login-B7IJkoBB.js"), "./Pages/Auth/Register.tsx": () => import("./assets/Register-CH5ibyag.js"), "./Pages/Dashboard.tsx": () => import("./assets/Dashboard-CkX9XKvM.js"), "./Pages/Product.tsx": () => import("./assets/Product-jVYts9wR.js"), "./Pages/SearchResults.tsx": () => import("./assets/SearchResults-BeRV1HdV.js"), "./Pages/Terms.tsx": () => import("./assets/Terms-D9ZGLYql.js"), "./Pages/Welcome.tsx": () => import("./assets/Welcome-CMr4zGVp.js") })
+      /* @__PURE__ */ Object.assign({ "./Pages/Auth/ForgotPassword.tsx": () => import("./assets/ForgotPassword-DghwoXVK.js"), "./Pages/Auth/Login.tsx": () => import("./assets/Login-CKzdgIkH.js"), "./Pages/Auth/Register.tsx": () => import("./assets/Register-DnRTAzLg.js"), "./Pages/Checkout.tsx": () => import("./assets/Checkout-C2ip4RnS.js"), "./Pages/Dashboard.tsx": () => import("./assets/Dashboard-FlNMyvYT.js"), "./Pages/Product.tsx": () => import("./assets/Product-BQYrz8cI.js"), "./Pages/Profile.tsx": () => import("./assets/Profile-B2UNc_rF.js"), "./Pages/SearchResults.tsx": () => import("./assets/SearchResults-iymSVk0P.js"), "./Pages/Terms.tsx": () => import("./assets/Terms-DMik0UUh.js"), "./Pages/Welcome.tsx": () => import("./assets/Welcome-C6uIKGIa.js") })
     ),
     setup: ({ App, props }) => /* @__PURE__ */ jsx(App, { ...props })
   })

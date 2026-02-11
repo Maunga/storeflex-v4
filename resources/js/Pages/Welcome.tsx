@@ -25,15 +25,17 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
     const { toast } = usePage<WelcomeProps>().props;
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [toastType, setToastType] = useState<'error' | 'success' | 'info'>('error');
+    const shownToastRef = useRef<string | null>(null);
     
     // Typing animation state
     const [currentIndex, setCurrentIndex] = useState(0);
     const [displayText, setDisplayText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // Show flash toast messages
+    // Show flash toast messages (only once per unique toast)
     useEffect(() => {
-        if (toast) {
+        if (toast && toast.message && toast.message !== shownToastRef.current) {
+            shownToastRef.current = toast.message;
             setToastType(toast.type ?? 'error');
             setToastMessage(toast.message);
         }
@@ -103,7 +105,7 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
             {loading && (
                 <div className="fixed inset-0 bg-white/60 dark:bg-neutral-950/60 z-50 flex items-center justify-center backdrop-blur-sm">
                     <div className="flex flex-col items-center gap-3 animate-fade-in">
-                        <div className="w-10 h-10 border-4 border-neutral-200 dark:border-neutral-700 border-t-[#86efac] rounded-full animate-spin" />
+                        <div className="w-10 h-10 border-4 border-neutral-200 border-t-[#86efac] rounded-full animate-spin" />
                         <span className="text-sm text-neutral-500 dark:text-neutral-400">Searching...</span>
                     </div>
                 </div>
@@ -142,14 +144,8 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                     {/* Header */}
                     <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
                         <Link href="/" className="flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-500 flex items-center justify-center">
-                                <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-                                    <line x1="3" y1="6" x2="21" y2="6"></line>
-                                    <path d="M16 10a4 4 0 0 1-8 0"></path>
-                                </svg>
-                            </div>
-                            Storeflex
+                            <img src="/images/logo.png" alt="Storeflex" className="h-8 w-auto" />
+                            
                         </Link>
 
                         {canLogin && (
@@ -157,7 +153,7 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                                 {auth?.user ? (
                                     <Link
                                         href="/dashboard"
-                                        className="px-4 py-2 text-sm font-medium text-white bg-[#86efac] hover:bg-[#61113E] rounded-lg transition-colors"
+                                        className="px-4 py-2 text-sm font-medium text-white bg-[#000000] hover:bg-[#111111] rounded-lg transition-colors"
                                     >
                                         Dashboard
                                     </Link>
@@ -186,12 +182,12 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                     {/* Hero Section */}
                     <main className="flex-1 flex flex-col items-center justify-center px-6 py-10 text-center">
                         <div className="max-w-[720px] w-full animate-fade-in">
-                            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 mb-6 text-[13px] font-medium text-[#eab308] bg-[#eab308]/10 rounded-full animate-fade-in animation-delay-100">
+                            {/* <span className="inline-flex items-center gap-1.5 px-3 py-1.5 mb-6 text-[13px] font-medium text-[#eab308] bg-[#eab308]/10 rounded-full animate-fade-in animation-delay-100">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                     <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                                 </svg>
                                 Powered by DXB Runners
-                            </span>
+                            </span> */}
 
                             <h1 className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight mb-4 text-neutral-900 dark:text-white animate-fade-in animation-delay-100">
                                 Find products from<br />

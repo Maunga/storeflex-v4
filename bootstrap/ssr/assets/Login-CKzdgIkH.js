@@ -16,11 +16,7 @@ function Login({ status, canResetPassword }) {
     /* @__PURE__ */ jsx(Head, { title: "Log in" }),
     /* @__PURE__ */ jsx("div", { className: "min-h-screen flex flex-col items-center justify-center bg-neutral-50 dark:bg-neutral-950 px-4", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-md", children: [
       /* @__PURE__ */ jsxs(Link, { href: "/", className: "flex items-center justify-center gap-2.5 mb-8", children: [
-        /* @__PURE__ */ jsx("div", { className: "w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-500 flex items-center justify-center", children: /* @__PURE__ */ jsxs("svg", { className: "w-6 h-6 text-white", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
-          /* @__PURE__ */ jsx("path", { d: "M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" }),
-          /* @__PURE__ */ jsx("line", { x1: "3", y1: "6", x2: "21", y2: "6" }),
-          /* @__PURE__ */ jsx("path", { d: "M16 10a4 4 0 0 1-8 0" })
-        ] }) }),
+        /* @__PURE__ */ jsx("img", { src: "/images/logo.png", alt: "Storeflex", className: "h-10 w-auto" }),
         /* @__PURE__ */ jsx("span", { className: "font-bold text-2xl text-neutral-900 dark:text-white", children: "Storeflex" })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 p-8 shadow-sm", children: [
@@ -39,7 +35,7 @@ function Login({ status, canResetPassword }) {
                   value: data.email,
                   onChange: (e) => setData("email", e.target.value),
                   className: "w-full px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#86efac]/20 focus:border-[#86efac] transition-colors",
-                  placeholder: "you@example.com",
+                  placeholder: "you@gmail.com",
                   autoComplete: "username"
                 }
               ),
@@ -89,7 +85,7 @@ function Login({ status, canResetPassword }) {
             {
               type: "submit",
               disabled: processing,
-              className: "w-full mt-6 px-4 py-2.5 bg-[#86efac] hover:bg-[#61113E] text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
+              className: "w-full mt-6 px-4 py-2.5 bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed",
               children: processing ? "Signing in..." : "Sign in"
             }
           )

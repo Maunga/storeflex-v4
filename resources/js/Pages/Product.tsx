@@ -1,20 +1,83 @@
-import { useState } from 'react';
-import { Head, Link, usePage } from '@inertiajs/react';
-import { PageProps, ProductData } from '@/types';
+import { useState, useEffect } from 'react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
+import { PageProps, ProductData, Bookmark } from '@/types';
 import Lightbox from 'yet-another-react-lightbox';
 import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
+import Toast from '@/Components/Toast';
+import axios from 'axios';
 import 'yet-another-react-lightbox/styles.css';
 import 'yet-another-react-lightbox/plugins/thumbnails.css';
 
 interface ProductPageProps extends PageProps {
     product: ProductData;
     identifier: string | null;
+    canLogin: boolean;
+    canRegister: boolean;
 }
 
-export default function Product({ auth, product, identifier }: ProductPageProps) {
+export default function Product({ auth, product, identifier, canLogin, canRegister }: ProductPageProps) {
     const [selectedImage, setSelectedImage] = useState(0);
     const [lightboxOpen, setLightboxOpen] = useState(false);
+    const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [bookmarkLoading, setBookmarkLoading] = useState(false);
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+    const [toastType, setToastType] = useState<'error' | 'success' | 'info'>('info');
+
+    // Load bookmarks when logged in
+    useEffect(() => {
+        if (auth?.user) {
+            axios.get('/bookmarks')
+                .then(res => {
+                    setBookmarks(res.data);
+                    // Check if current product is bookmarked
+                    const found = res.data.some((b: Bookmark) => b.asin === identifier);
+                    setIsBookmarked(found);
+                })
+                .catch(() => {});
+        }
+    }, [auth?.user, identifier]);
+
+    const handleBookmark = async () => {
+        if (!auth?.user) {
+            // Show toast and redirect to login if not authenticated
+            setToastType('info');
+            setToastMessage('Please log in to save bookmarks');
+            setTimeout(() => {
+                // router.visit('/login');
+            }, 1500);
+            return;
+        }
+        
+        setBookmarkLoading(true);
+        try {
+            if (isBookmarked) {
+                // Remove bookmark
+                await axios.delete('/bookmarks', { data: { asin: identifier } });
+                setBookmarks(prev => prev.filter(b => b.asin !== identifier));
+                setIsBookmarked(false);
+            } else {
+                // Add bookmark
+                const res = await axios.post('/bookmarks', {
+                    img_url: product.images?.[0] ?? '',
+                    title: product.title ?? 'Unknown Product',
+                    price: product.dxb_price ? parseFloat(product.dxb_price) : (product.price ?? 0),
+                    asin: identifier,
+                });
+                if (res.data.success) {
+                    setBookmarks(prev => [res.data.bookmark, ...prev]);
+                    setIsBookmarked(true);
+                }
+            }
+        } catch (error: any) {
+            if (error.response?.status === 409) {
+                setIsBookmarked(true);
+            }
+        } finally {
+            setBookmarkLoading(false);
+        }
+    };
 
     const images = product.images ?? [];
     const bulletPoints = product.bullet_points
@@ -43,6 +106,49 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                 Log out
                             </Link>
                         </div>
+                        
+                        {/* Bookmarks */}
+                        <div className="flex-1 overflow-y-auto">
+                            <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">
+                                Bookmarks
+                            </h3>
+                            {bookmarks.length > 0 ? (
+                                <div className="space-y-2">
+                                    {bookmarks.map((bookmark) => (
+                                        <Link
+                                            key={bookmark.id}
+                                            href={bookmark.asin ? `/product/${bookmark.asin}` : '#'}
+                                            className={`flex items-center gap-3 p-2 rounded-lg transition-colors ${
+                                                bookmark.asin === identifier
+                                                    ? 'bg-[#86efac]/10 border border-[#86efac]/30'
+                                                    : 'hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                                            }`}
+                                        >
+                                            <img
+                                                src={bookmark.img_url}
+                                                alt=""
+                                                className="w-10 h-10 object-contain rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                                            />
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-xs text-neutral-700 dark:text-neutral-300 line-clamp-2 leading-tight">
+                                                    {bookmark.title}
+                                                </p>
+                                                <p className="text-xs font-medium text-emerald-600 dark:text-[#86efac] mt-0.5">
+                                                    ${bookmark.price}
+                                                </p>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="text-center py-8 text-neutral-400 dark:text-neutral-500">
+                                    <svg className="w-10 h-10 mx-auto mb-2 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                    </svg>
+                                    <p className="text-xs">No bookmarks yet</p>
+                                </div>
+                            )}
+                        </div>
                     </aside>
                 )}
 
@@ -50,19 +156,43 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                     {/* Header */}
                     <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
                         <Link href="/" className="flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 via-pink-400 to-yellow-500 flex items-center justify-center">
-                                <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                                    <line x1="3" y1="6" x2="21" y2="6" />
-                                    <path d="M16 10a4 4 0 0 1-8 0" />
-                                </svg>
-                            </div>
-                            Storeflex
+                            <img src="/images/logo.png" alt="Storeflex" className="h-8 w-auto" />
+                       
                         </Link>
-                        <Link href="/" className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors">
-                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-                            New Search
-                        </Link>
+
+                        {canLogin && (
+                            <nav className="flex items-center gap-3">
+                                <Link href="/" className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors">
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+                                    New Search
+                                </Link>
+                                {auth?.user ? (
+                                    <Link
+                                        href="/dashboard"
+                                        className="px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 rounded-lg transition-colors"
+                                    >
+                                        Dashboard
+                                    </Link>
+                                ) : (
+                                    <>
+                                        <Link
+                                            href="/login"
+                                            className="px-4 py-2 text-sm text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-lg transition-colors font-bold"
+                                        >
+                                            Log in
+                                        </Link>
+                                        {canRegister && (
+                                            <Link
+                                                href="/register"
+                                                className="px-4 py-2 text-sm font-medium text-white bg-neutral-900 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 rounded-lg transition-colors"
+                                            >
+                                                Get Started
+                                            </Link>
+                                        )}
+                                    </>
+                                )}
+                            </nav>
+                        )}
                     </header>
 
                     {/* Product Content */}
@@ -185,7 +315,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                     )}
 
                                     {/* Delivery */}
-                                    {delivery.length > 0 && (
+                                    {/* {delivery.length > 0 && (
                                         <div className="space-y-2">
                                             <h3 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Delivery</h3>
                                             {delivery.map((d, i) => (
@@ -195,7 +325,7 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                                 </div>
                                             ))}
                                         </div>
-                                    )}
+                                    )} */}
 
                                     {/* Bullet Points */}
                                     {bulletPoints.length > 0 && (
@@ -216,6 +346,29 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
 
                                 {/* Column 3: Price & Options */}
                                 <div className="space-y-6 animate-fade-in-up animate-delay-200 lg:sticky lg:top-24">
+                                
+                                    {/* Bookmark Button */}
+                                    <button
+                                        onClick={handleBookmark}
+                                        disabled={bookmarkLoading}
+                                        className={`w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                                            isBookmarked
+                                                ? 'bg-[#86efac]/20 text-emerald-700 dark:text-[#86efac] border-2 border-[#86efac]'
+                                                : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200 dark:hover:bg-neutral-700 border-2 border-transparent'
+                                        } ${bookmarkLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    >
+                                        {bookmarkLoading ? (
+                                            <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        ) : (
+                                            <svg className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                                            </svg>
+                                        )}
+                                        {isBookmarked ? 'Bookmarked' : 'Add Bookmark'}
+                                    </button>
 
                                      {/* Amazon Link */}
                                     {(product.url || product.scraped_url) && (
@@ -315,6 +468,19 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                                         )}
                                     </div>
 
+                                    {/* Buy Button */}
+                                    <Link
+                                        href={`/checkout/${identifier}`}
+                                        className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:text-neutral-900 dark:hover:bg-emerald-400 rounded-lg transition-colors shadow-sm"
+                                    >
+                                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                            <circle cx="9" cy="21" r="1" />
+                                            <circle cx="20" cy="21" r="1" />
+                                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                                        </svg>
+                                        Buy Now
+                                    </Link>
+
 
                                 </div>
                             </div>
@@ -402,6 +568,13 @@ export default function Product({ auth, product, identifier }: ProductPageProps)
                     </footer>
                 </div>
             </div>
+            
+            {/* Toast Notifications */}
+            <Toast 
+                message={toastMessage} 
+                type={toastType} 
+                onDismiss={() => setToastMessage(null)} 
+            />
         </>
     );
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CheckoutApiController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\MarketingController;
 use App\Http\Controllers\Api\OrderController;
@@ -17,6 +18,8 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::group(['prefix' => 'checkout'], function () {
     Route::get('/payment-methods', [CheckoutController::class, 'payment_methods']);
+    Route::get('/agents', [CheckoutController::class, 'agents']);
+    Route::post('/process', [CheckoutApiController::class, 'process']); // Unified checkout endpoint
 });
 
 Route::group(['prefix' => 'marketing'], function () {
