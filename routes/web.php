@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BookmarkController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use Illuminate\Support\Facades\Route;
@@ -18,13 +19,17 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/orders', [OrderHistoryController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('orders.index');
+
 Route::get('/terms', function () {
     return Inertia::render('Terms');
 })->name('terms');
 
 Route::post('/search', [SearchController::class, 'handle'])->name('search');
 Route::get('/search', [SearchController::class, 'showSearchResults'])->name('search.results');
-Route::post('/product/prefetch', [SearchController::class, 'prefetchProduct'])->name('product.prefetch');
+Route::get('/product/prefetch', [SearchController::class, 'prefetchProduct'])->name('product.prefetch');
 Route::get('/product/{asin}', [SearchController::class, 'showProduct'])->name('product.show');
 
 // Checkout

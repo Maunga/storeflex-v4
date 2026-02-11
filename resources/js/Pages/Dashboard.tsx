@@ -141,6 +141,23 @@ export default function Dashboard({ auth }: PageProps) {
                                         </div>
                                     </Link>
                                     <Link
+                                        href="/orders"
+                                        className="flex items-center gap-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                                    >
+                                        <div className="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center">
+                                            <svg className="w-5 h-5 text-emerald-600 dark:text-[#86efac]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <path d="M9 3h6l1 2h4v16H4V5h4l1-2z" />
+                                                <path d="M8 10h8" />
+                                                <path d="M8 14h8" />
+                                                <path d="M8 18h5" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-neutral-900 dark:text-white">Order History</p>
+                                            <p className="text-sm text-neutral-500 dark:text-neutral-400">Review past orders</p>
+                                        </div>
+                                    </Link>
+                                    <Link
                                         href="/profile"
                                         className="flex items-center gap-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                                     >

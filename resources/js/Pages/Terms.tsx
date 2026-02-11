@@ -1,7 +1,21 @@
+import { useEffect, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { PageProps } from '@/types';
+import { PageProps, Bookmark } from '@/types';
+import SidebarBookmarks, { BookmarksDrawer } from '@/Components/SidebarBookmarks';
+import axios from 'axios';
 
 export default function Terms({ auth }: PageProps) {
+    const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+    const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
+
+    useEffect(() => {
+        if (auth?.user) {
+            axios.get('/bookmarks')
+                .then((res) => setBookmarks(res.data))
+                .catch(() => {});
+        }
+    }, [auth?.user]);
+
     return (
         <>
             <Head title="Terms & Conditions" />
@@ -9,31 +23,41 @@ export default function Terms({ auth }: PageProps) {
             <div className="flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950">
                 {/* Sidebar for logged in users */}
                 {auth?.user && (
-                    <aside className="hidden lg:flex w-[260px] flex-col p-4 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800">
-                        <div className="flex items-center justify-between pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800">
-                            <span className="font-medium text-sm text-neutral-700 dark:text-neutral-300 truncate max-w-[180px]" title={auth.user.email}>
-                                {auth.user.email}
-                            </span>
-                            <Link
-                                href="/logout"
-                                method="post"
-                                as="button"
-                                className="text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors"
-                            >
-                                Log out
-                            </Link>
-                        </div>
-                    </aside>
+                    <SidebarBookmarks user={auth.user} bookmarks={bookmarks} />
+                )}
+                {auth?.user && (
+                    <BookmarksDrawer
+                        user={auth.user}
+                        bookmarks={bookmarks}
+                        isOpen={isBookmarksOpen}
+                        onClose={() => setIsBookmarksOpen(false)}
+                    />
                 )}
 
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col min-h-screen">
                     {/* Header */}
                     <header className="flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
-                        <Link href="/" className="flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white">
+                        <div className="flex items-center gap-3">
+                            {auth?.user && (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsBookmarksOpen(true)}
+                                    className="lg:hidden p-2 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors"
+                                    aria-label="Open menu"
+                                >
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="3" y1="6" x2="21" y2="6" />
+                                        <line x1="3" y1="12" x2="21" y2="12" />
+                                        <line x1="3" y1="18" x2="21" y2="18" />
+                                    </svg>
+                                </button>
+                            )}
+                            <Link href="/" className="flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white">
                             <img src="/images/logo.png" alt="Storeflex" className="h-8 w-auto" />
                             
-                        </Link>
+                            </Link>
+                        </div>
 
                         <nav className="flex items-center gap-3">
                             {auth?.user ? (

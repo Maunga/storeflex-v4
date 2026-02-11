@@ -38,7 +38,7 @@ class SearchController extends Controller
     }
 
     /**
-     * POST /product/prefetch — Prefetch a product by ASIN via AJAX before navigation.
+     * GET /product/prefetch — Prefetch a product by ASIN via AJAX before navigation.
      * Returns JSON so frontend can wait for scrape before navigating.
      */
     public function prefetchProduct(Request $request)

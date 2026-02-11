@@ -2,6 +2,8 @@ import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useRef, useEffect } from "react";
 import { useRemember, usePage, Head, Link, router } from "@inertiajs/react";
 import { T as Toast } from "./Toast-2CzZTQ7I.js";
+import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import axios from "axios";
 const marketingStatements = [
   { text: "Amazon.ae" },
   { text: "any product name" },
@@ -15,6 +17,8 @@ function Welcome({ auth, canLogin, canRegister }) {
   const [toastMessage, setToastMessage] = useState(null);
   const [toastType, setToastType] = useState("error");
   const shownToastRef = useRef(null);
+  const [bookmarks, setBookmarks] = useState([]);
+  const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [displayText, setDisplayText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -25,6 +29,12 @@ function Welcome({ auth, canLogin, canRegister }) {
       setToastMessage(toast.message);
     }
   }, [toast]);
+  useEffect(() => {
+    if (auth?.user) {
+      axios.get("/bookmarks").then((res) => setBookmarks(res.data)).catch(() => {
+      });
+    }
+  }, [auth?.user]);
   useEffect(() => {
     const currentStatement = marketingStatements[currentIndex].text;
     const typingSpeed = isDeleting ? 50 : 100;
@@ -80,28 +90,35 @@ function Welcome({ auth, canLogin, canRegister }) {
       /* @__PURE__ */ jsx("span", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: "Searching..." })
     ] }) }),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
-      auth?.user && /* @__PURE__ */ jsxs("aside", { className: "hidden lg:flex w-[260px] flex-col p-4 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800", children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800", children: [
-          /* @__PURE__ */ jsx("span", { className: "font-medium text-sm text-neutral-700 dark:text-neutral-300 truncate max-w-[180px]", title: auth.user.email, children: auth.user.email }),
-          /* @__PURE__ */ jsx(
-            Link,
-            {
-              href: "/logout",
-              method: "post",
-              as: "button",
-              className: "text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors",
-              children: "Log out"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col items-center justify-center text-center p-6 text-neutral-500 dark:text-neutral-400", children: [
-          /* @__PURE__ */ jsx("svg", { className: "w-12 h-12 mb-3 opacity-40", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round", children: /* @__PURE__ */ jsx("path", { d: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" }) }),
-          /* @__PURE__ */ jsx("p", { className: "text-[13px] leading-relaxed", children: "Your search history will appear here." })
-        ] })
-      ] }),
+      auth?.user && /* @__PURE__ */ jsx(SidebarBookmarks, { user: auth.user, bookmarks }),
+      auth?.user && /* @__PURE__ */ jsx(
+        BookmarksDrawer,
+        {
+          user: auth.user,
+          bookmarks,
+          isOpen: isBookmarksOpen,
+          onClose: () => setIsBookmarksOpen(false)
+        }
+      ),
       /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col min-h-screen", children: [
         /* @__PURE__ */ jsxs("header", { className: "flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800", children: [
-          /* @__PURE__ */ jsx(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: /* @__PURE__ */ jsx("img", { src: "/images/logo.png", alt: "Storeflex", className: "h-8 w-auto" }) }),
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+            auth?.user && /* @__PURE__ */ jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => setIsBookmarksOpen(true),
+                className: "lg:hidden p-2 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors",
+                "aria-label": "Open menu",
+                children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                  /* @__PURE__ */ jsx("line", { x1: "3", y1: "6", x2: "21", y2: "6" }),
+                  /* @__PURE__ */ jsx("line", { x1: "3", y1: "12", x2: "21", y2: "12" }),
+                  /* @__PURE__ */ jsx("line", { x1: "3", y1: "18", x2: "21", y2: "18" })
+                ] })
+              }
+            ),
+            /* @__PURE__ */ jsx(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: /* @__PURE__ */ jsx("img", { src: "/images/logo.png", alt: "Storeflex", className: "h-8 w-auto" }) })
+          ] }),
           canLogin && /* @__PURE__ */ jsx("nav", { className: "flex items-center gap-3", children: auth?.user ? /* @__PURE__ */ jsx(
             Link,
             {

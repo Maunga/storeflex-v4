@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect, FormEvent, ChangeEvent } from 'react';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { PageProps, SearchResultItem, Bookmark } from '@/types';
 import axios from 'axios';
 import NProgress from 'nprogress';
+import SidebarBookmarks, { BookmarksDrawer } from '@/Components/SidebarBookmarks';
 
 type SortOption = 'relevant' | 'price_low' | 'price_high' | 'rating';
 
@@ -19,19 +20,20 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
     const [loadingMessage, setLoadingMessage] = useState('Fetching product details...');
     const [sortBy, setSortBy] = useState<SortOption>('relevant');
     const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+    const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
 
     // Load bookmarks when logged in
     useEffect(() => {
         if (auth?.user) {
             axios.get('/bookmarks')
-                .then(res => setBookmarks(res.data))
+                .then((res) => setBookmarks(res.data))
                 .catch(() => {});
         }
     }, [auth?.user]);
 
     const sortedResults = useMemo(() => {
         if (sortBy === 'relevant') return results;
-        
+
         return [...results].sort((a, b) => {
             switch (sortBy) {
                 case 'price_low':
@@ -61,11 +63,11 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
             setLoading(true);
             setLoadingMessage('Fetching product details...');
             NProgress.start();
-            
+
             try {
                 // Prefetch/scrape the product first
-                const response = await axios.post('/product/prefetch', { asin: item.asin });
-                
+                const response = await axios.get('/product/prefetch', { params: { asin: item.asin } });
+
                 if (response.data.success) {
                     // Product is now cached, navigate to it
                     setLoadingMessage('Redirecting...');
@@ -89,7 +91,7 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
             }
             return;
         }
-        
+
         // Fallback: POST the URL for scraping if no ASIN
         const amazonUrl = item.url?.startsWith('http')
             ? item.url
@@ -108,64 +110,40 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
             <div className="flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950">
                 {/* Sidebar */}
                 {auth?.user && (
-                    <aside className="hidden lg:flex w-[260px] flex-col p-4 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800">
-                        <div className="flex items-center justify-between pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800">
-                            <span className="font-medium text-sm text-neutral-700 dark:text-neutral-300 truncate max-w-[180px]" title={auth.user.email}>
-                                {auth.user.email}
-                            </span>
-                            <Link href="/logout" method="post" as="button" className="text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-[#86efac] transition-colors">
-                                Log out
-                            </Link>
-                        </div>
-                        
-                        {/* Bookmarks */}
-                        <div className="flex-1 overflow-y-auto">
-                            <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">
-                                Bookmarks
-                            </h3>
-                            {bookmarks.length > 0 ? (
-                                <div className="space-y-2">
-                                    {bookmarks.map((bookmark) => (
-                                        <Link
-                                            key={bookmark.id}
-                                            href={bookmark.asin ? `/product/${bookmark.asin}` : '#'}
-                                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
-                                        >
-                                            <img
-                                                src={bookmark.img_url}
-                                                alt=""
-                                                className="w-10 h-10 object-contain rounded bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
-                                            />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-xs text-neutral-700 dark:text-neutral-300 line-clamp-2 leading-tight">
-                                                    {bookmark.title}
-                                                </p>
-                                                <p className="text-xs font-medium text-emerald-600 dark:text-[#86efac] mt-0.5">
-                                                    ${bookmark.price}
-                                                </p>
-                                            </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8 text-neutral-400 dark:text-neutral-500">
-                                    <svg className="w-10 h-10 mx-auto mb-2 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                    <p className="text-xs">No bookmarks yet</p>
-                                </div>
-                            )}
-                        </div>
-                    </aside>
+                    <SidebarBookmarks user={auth.user} bookmarks={bookmarks} />
+                )}
+                {auth?.user && (
+                    <BookmarksDrawer
+                        user={auth.user}
+                        bookmarks={bookmarks}
+                        isOpen={isBookmarksOpen}
+                        onClose={() => setIsBookmarksOpen(false)}
+                    />
                 )}
 
                 <div className="flex-1 flex flex-col min-h-screen">
                     {/* Header */}
                     <header className="flex flex-wrap items-center gap-3 px-3 sm:px-6 py-3 sm:py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800">
-                        <Link href="/" className="flex items-center gap-2 sm:gap-2.5 font-bold text-lg sm:text-xl text-neutral-900 dark:text-white shrink-0">
+                        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+                            {auth?.user && (
+                                <button
+                                    type="button"
+                                    onClick={() => setIsBookmarksOpen(true)}
+                                    className="lg:hidden p-2 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors"
+                                    aria-label="Open menu"
+                                >
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <line x1="3" y1="6" x2="21" y2="6" />
+                                        <line x1="3" y1="12" x2="21" y2="12" />
+                                        <line x1="3" y1="18" x2="21" y2="18" />
+                                    </svg>
+                                </button>
+                            )}
+                            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 font-bold text-lg sm:text-xl text-neutral-900 dark:text-white shrink-0">
                             <img src="/images/logo.png" alt="Storeflex" className="h-7 sm:h-8 w-auto" />
                             <span className="hidden xs:inline">Storeflex</span>
-                        </Link>
+                            </Link>
+                        </div>
 
                         <form onSubmit={handleNewSearch} className="flex-1 min-w-0 order-last sm:order-none w-full sm:w-auto sm:max-w-xl">
                             <div className="relative">

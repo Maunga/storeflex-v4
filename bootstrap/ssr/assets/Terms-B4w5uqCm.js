@@ -1,25 +1,49 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
+import { useState, useEffect } from "react";
 import { Head, Link } from "@inertiajs/react";
+import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import axios from "axios";
 function Terms({ auth }) {
+  const [bookmarks, setBookmarks] = useState([]);
+  const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
+  useEffect(() => {
+    if (auth?.user) {
+      axios.get("/bookmarks").then((res) => setBookmarks(res.data)).catch(() => {
+      });
+    }
+  }, [auth?.user]);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(Head, { title: "Terms & Conditions" }),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
-      auth?.user && /* @__PURE__ */ jsx("aside", { className: "hidden lg:flex w-[260px] flex-col p-4 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800", children: [
-        /* @__PURE__ */ jsx("span", { className: "font-medium text-sm text-neutral-700 dark:text-neutral-300 truncate max-w-[180px]", title: auth.user.email, children: auth.user.email }),
-        /* @__PURE__ */ jsx(
-          Link,
-          {
-            href: "/logout",
-            method: "post",
-            as: "button",
-            className: "text-xs text-neutral-500 hover:text-[#86efac] dark:text-neutral-400 dark:hover:text-pink-400 transition-colors",
-            children: "Log out"
-          }
-        )
-      ] }) }),
+      auth?.user && /* @__PURE__ */ jsx(SidebarBookmarks, { user: auth.user, bookmarks }),
+      auth?.user && /* @__PURE__ */ jsx(
+        BookmarksDrawer,
+        {
+          user: auth.user,
+          bookmarks,
+          isOpen: isBookmarksOpen,
+          onClose: () => setIsBookmarksOpen(false)
+        }
+      ),
       /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col min-h-screen", children: [
         /* @__PURE__ */ jsxs("header", { className: "flex items-center justify-between px-6 py-4 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800", children: [
-          /* @__PURE__ */ jsx(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: /* @__PURE__ */ jsx("img", { src: "/images/logo.png", alt: "Storeflex", className: "h-8 w-auto" }) }),
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+            auth?.user && /* @__PURE__ */ jsx(
+              "button",
+              {
+                type: "button",
+                onClick: () => setIsBookmarksOpen(true),
+                className: "lg:hidden p-2 rounded-lg text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-white dark:hover:bg-neutral-800 transition-colors",
+                "aria-label": "Open menu",
+                children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", children: [
+                  /* @__PURE__ */ jsx("line", { x1: "3", y1: "6", x2: "21", y2: "6" }),
+                  /* @__PURE__ */ jsx("line", { x1: "3", y1: "12", x2: "21", y2: "12" }),
+                  /* @__PURE__ */ jsx("line", { x1: "3", y1: "18", x2: "21", y2: "18" })
+                ] })
+              }
+            ),
+            /* @__PURE__ */ jsx(Link, { href: "/", className: "flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white", children: /* @__PURE__ */ jsx("img", { src: "/images/logo.png", alt: "Storeflex", className: "h-8 w-auto" }) })
+          ] }),
           /* @__PURE__ */ jsx("nav", { className: "flex items-center gap-3", children: auth?.user ? /* @__PURE__ */ jsx(
             Link,
             {

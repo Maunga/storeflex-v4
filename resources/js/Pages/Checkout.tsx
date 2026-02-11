@@ -37,6 +37,19 @@ interface ShippingInfo {
     phone: string;
 }
 
+interface OrderSuccessSummary {
+    orderId: number | null;
+    wooOrderId: number | string | null;
+    total: number | null;
+    paymentMethod: string;
+    deliveryMethod: string;
+    shipping: ShippingInfo;
+    billing: ShippingInfo;
+    quantity: number;
+    productTitle: string;
+    productImage: string;
+}
+
 export default function Checkout({ auth, product, identifier, savedCheckoutData }: CheckoutPageProps) {
     const [step, setStep] = useState<'shipping' | 'billing' | 'payment'>('shipping');
     const [loading, setLoading] = useState(false);
@@ -44,6 +57,7 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
     const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [toastType, setToastType] = useState<'error' | 'success' | 'info'>('info');
+    const [orderSuccess, setOrderSuccess] = useState<OrderSuccessSummary | null>(null);
     const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('pickup');
     
     const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
@@ -180,14 +194,20 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
             if (response.data.success) {
                 setToastType('success');
                 setToastMessage('Order placed successfully!');
-                
-                setTimeout(() => {
-                    if (auth?.user) {
-                        router.visit('/dashboard');
-                    } else {
-                        router.visit('/');
-                    }
-                }, 2000);
+
+                const orderData = response.data.data?.order ?? null;
+                setOrderSuccess({
+                    orderId: orderData?.id ?? null,
+                    wooOrderId: response.data.data?.woocommerce_order_id ?? null,
+                    total: orderData?.total ?? null,
+                    paymentMethod: selectedPaymentMethod.title,
+                    deliveryMethod,
+                    shipping: shippingInfo,
+                    billing: sameAsShipping ? shippingInfo : billingInfo,
+                    quantity: checkoutData.quantity,
+                    productTitle: product.title ?? 'Order Item',
+                    productImage: product.images?.[0] ?? '/placeholder.png',
+                });
             } else {
                 throw new Error(response.data.message || 'Order failed');
             }
@@ -198,6 +218,169 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
             setLoading(false);
         }
     };
+
+    if (orderSuccess) {
+        return (
+            <>
+                <Head title="Order Successful" />
+
+                <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
+                    <header className="bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 px-6 py-4">
+                        <div className="max-w-4xl mx-auto flex items-center justify-between">
+                            <Link href="/" className="flex items-center gap-2.5 font-bold text-xl text-neutral-900 dark:text-white">
+                                <img src="/images/logo.png" alt="Storeflex" className="h-8 w-auto" />
+                            </Link>
+                            {auth?.user && (
+                                <span className="text-sm text-neutral-600 dark:text-neutral-400">
+                                    {auth.user.email}
+                                </span>
+                            )}
+                        </div>
+                    </header>
+
+                    <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
+                        <div className="bg-white dark:bg-neutral-900 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-sm p-6 sm:p-8">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+                                        <svg className="w-6 h-6 text-emerald-700 dark:text-[#86efac]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <polyline points="20 6 9 17 4 12" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white">Order successfully placed</h1>
+                                        <p className="text-sm text-neutral-500 dark:text-neutral-400">Thanks for your purchase. We are processing your order now.</p>
+                                    </div>
+                                </div>
+                                <div className="text-sm text-neutral-500 dark:text-neutral-400">
+                                    {orderSuccess.orderId != null && (
+                                        <div>Order #{orderSuccess.orderId}</div>
+                                    )}
+                                    {orderSuccess.wooOrderId != null && (
+                                        <div>WooCommerce #{orderSuccess.wooOrderId}</div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                <div className="lg:col-span-2 space-y-4">
+                                    <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+                                        <h2 className="text-sm font-semibold text-neutral-900 dark:text-white mb-3">Order summary</h2>
+                                        <div className="flex items-center gap-4">
+                                            <img
+                                                src={orderSuccess.productImage}
+                                                alt={orderSuccess.productTitle}
+                                                className="w-16 h-16 rounded-lg object-contain bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                                            />
+                                            <div className="flex-1">
+                                                <p className="text-sm font-medium text-neutral-900 dark:text-white">
+                                                    {orderSuccess.productTitle}
+                                                </p>
+                                                <p className="text-xs text-neutral-500 dark:text-neutral-400">Qty: {orderSuccess.quantity}</p>
+                                            </div>
+                                            <div className="text-sm font-semibold text-neutral-900 dark:text-white">
+                                                {orderSuccess.total != null ? `AED ${orderSuccess.total}` : 'Paid'}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">Shipping</h3>
+                                            <p className="text-sm text-neutral-900 dark:text-white">
+                                                {orderSuccess.shipping.first_name} {orderSuccess.shipping.last_name}
+                                            </p>
+                                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                                {orderSuccess.shipping.address_1 || 'Pickup order'}
+                                            </p>
+                                            {orderSuccess.shipping.city && (
+                                                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                                    {orderSuccess.shipping.city} {orderSuccess.shipping.postcode}
+                                                </p>
+                                            )}
+                                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                                {orderSuccess.shipping.email}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wide mb-2">Billing</h3>
+                                            <p className="text-sm text-neutral-900 dark:text-white">
+                                                {orderSuccess.billing.first_name} {orderSuccess.billing.last_name}
+                                            </p>
+                                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                                {orderSuccess.billing.address_1 || 'Pickup order'}
+                                            </p>
+                                            {orderSuccess.billing.city && (
+                                                <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                                    {orderSuccess.billing.city} {orderSuccess.billing.postcode}
+                                                </p>
+                                            )}
+                                            <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                                                {orderSuccess.billing.email}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 space-y-3">
+                                    <h3 className="text-sm font-semibold text-neutral-900 dark:text-white">Payment & delivery</h3>
+                                    <div className="text-sm text-neutral-600 dark:text-neutral-400">
+                                        <div className="flex justify-between">
+                                            <span>Payment</span>
+                                            <span className="text-neutral-900 dark:text-white">{orderSuccess.paymentMethod}</span>
+                                        </div>
+                                        <div className="flex justify-between mt-2">
+                                            <span>Delivery</span>
+                                            <span className="text-neutral-900 dark:text-white">
+                                                {orderSuccess.deliveryMethod === 'pickup' ? 'Pickup' : 'Delivery'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between mt-2">
+                                            <span>Total</span>
+                                            <span className="text-neutral-900 dark:text-white">
+                                                {orderSuccess.total != null ? `AED ${orderSuccess.total}` : 'Paid'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="pt-3 border-t border-neutral-200 dark:border-neutral-800 flex flex-col gap-2">
+                                        {auth?.user ? (
+                                            <Link
+                                                href="/dashboard"
+                                                className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 transition-colors"
+                                            >
+                                                View dashboard
+                                            </Link>
+                                        ) : (
+                                            <Link
+                                                href="/"
+                                                className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg bg-neutral-900 text-white text-sm font-semibold hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 transition-colors"
+                                            >
+                                                Back to home
+                                            </Link>
+                                        )}
+                                        {auth?.user && (
+                                            <Link
+                                                href="/orders"
+                                                className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                                            >
+                                                View order history
+                                            </Link>
+                                        )}
+                                        <Link
+                                            href={`/product/${identifier}`}
+                                            className="inline-flex items-center justify-center px-4 py-2.5 rounded-lg border border-neutral-200 dark:border-neutral-700 text-sm font-semibold text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                                        >
+                                            Back to product
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </>
+        );
+    }
 
     return (
         <>
