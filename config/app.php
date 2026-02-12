@@ -131,6 +131,8 @@ return [
 
     'oxylabs_endpoint' => env('OXYLABS_ENDPOINT', 'https://realtime.oxylabs.io/v1/queries'),
     'oxylabs_token' => env('OXYLABS_TOKEN'),
+    'oxylabs_username' => env('OXYLABS_USERNAME'),
+    'oxylabs_password' => env('OXYLABS_PASSWORD'),
 
     /*
     |--------------------------------------------------------------------------

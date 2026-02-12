@@ -345,13 +345,13 @@ class SearchController extends Controller
     private function performTextSearch(string $query): ?array
     {
         try {
-            $username = env('OXYLABS_USERNAME');
-            $password = env('OXYLABS_PASSWORD');
+            $username = config('app.oxylabs_username');
+            $password = config('app.oxylabs_password');
 
             Log::info('SearchController: Starting text search', ['query' => $query, 'username' => $username ? 'set' : 'missing']);
 
             $client = new Client();
-            $response = $client->request('POST', 'https://realtime.oxylabs.io/v1/queries', [
+            $response = $client->request('POST', config('app.oxylabs_endpoint'), [
                 'auth' => [$username, $password],
                 'headers' => [
                     'Accept' => 'application/json',

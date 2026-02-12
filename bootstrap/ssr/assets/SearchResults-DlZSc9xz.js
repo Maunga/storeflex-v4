@@ -18,8 +18,9 @@ function SearchResults({ auth, results, query, canLogin, canRegister }) {
     }
   }, [auth?.user]);
   const sortedResults = useMemo(() => {
-    if (sortBy === "relevant") return results;
-    return [...results].sort((a, b) => {
+    const pricedResults = results.filter((item) => (item.price ?? 0) > 0);
+    if (sortBy === "relevant") return pricedResults;
+    return [...pricedResults].sort((a, b) => {
       switch (sortBy) {
         case "price_low":
           return (a.price ?? Infinity) - (b.price ?? Infinity);
@@ -160,7 +161,7 @@ function SearchResults({ auth, results, query, canLogin, canRegister }) {
         /* @__PURE__ */ jsx("main", { className: "flex-1 w-full px-2 sm:px-6 py-4 sm:py-6", children: /* @__PURE__ */ jsxs("div", { className: "w-full max-w-6xl mx-auto animate-page-enter", children: [
           /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6", children: [
             /* @__PURE__ */ jsxs("p", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: [
-              /* @__PURE__ */ jsx("span", { className: "font-medium text-neutral-700 dark:text-neutral-300", children: results.length }),
+              /* @__PURE__ */ jsx("span", { className: "font-medium text-neutral-700 dark:text-neutral-300", children: sortedResults.length }),
               ' results for "',
               /* @__PURE__ */ jsx("span", { className: "font-medium text-neutral-700 dark:text-neutral-300", children: query }),
               '"'
