@@ -42,8 +42,17 @@ class AmazonAeScraperService implements EcommerceScraperInterface
         // Log the origin of the request
         Log::channel('scrape')->info('Request origin:', ['origin' => $origin, 'url' => $given_url]);
 
-        // Check if the origin is not the allowed URL and the environment is production
-        if ($origin !== 'https://storeflex.dxbrunners.com/' && App::environment('production')) {
+        // Check if the origin is not from allowed domains and the environment is production
+        $allowedOrigins = ['https://storeflex.dxbrunners.com', 'https://sf4.dxbrunners.com'];
+        $isAllowed = false;
+        foreach ($allowedOrigins as $allowed) {
+            if (str_starts_with($origin, $allowed)) {
+                $isAllowed = true;
+                break;
+            }
+        }
+
+        if (!$isAllowed && App::environment('production')) {
             // Log the blocked request
             Log::channel('scrape')->info('Blocked request:', ['message' => 'Blocked: ' . $origin, 'url' => $given_url]);
             return [
