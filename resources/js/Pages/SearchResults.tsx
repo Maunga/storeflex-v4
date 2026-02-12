@@ -32,9 +32,11 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
     }, [auth?.user]);
 
     const sortedResults = useMemo(() => {
-        if (sortBy === 'relevant') return results;
+        const pricedResults = results.filter((item) => (item.price ?? 0) > 0);
 
-        return [...results].sort((a, b) => {
+        if (sortBy === 'relevant') return pricedResults;
+
+        return [...pricedResults].sort((a, b) => {
             switch (sortBy) {
                 case 'price_low':
                     return (a.price ?? Infinity) - (b.price ?? Infinity);
@@ -207,7 +209,7 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
                         <div className="w-full max-w-6xl mx-auto animate-page-enter">
                             <div className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
                                 <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                                    <span className="font-medium text-neutral-700 dark:text-neutral-300">{results.length}</span> results for "<span className="font-medium text-neutral-700 dark:text-neutral-300">{query}</span>"
+                                    <span className="font-medium text-neutral-700 dark:text-neutral-300">{sortedResults.length}</span> results for "<span className="font-medium text-neutral-700 dark:text-neutral-300">{query}</span>"
                                 </p>
                                 
                                 {/* Sort dropdown */}

@@ -120,6 +120,25 @@ function Dashboard({ auth }) {
               /* @__PURE__ */ jsxs(
                 Link,
                 {
+                  href: "/orders",
+                  className: "flex items-center gap-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors",
+                  children: [
+                    /* @__PURE__ */ jsx("div", { className: "w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-900/20 flex items-center justify-center", children: /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 text-emerald-600 dark:text-[#86efac]", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "2", children: [
+                      /* @__PURE__ */ jsx("path", { d: "M9 3h6l1 2h4v16H4V5h4l1-2z" }),
+                      /* @__PURE__ */ jsx("path", { d: "M8 10h8" }),
+                      /* @__PURE__ */ jsx("path", { d: "M8 14h8" }),
+                      /* @__PURE__ */ jsx("path", { d: "M8 18h5" })
+                    ] }) }),
+                    /* @__PURE__ */ jsxs("div", { children: [
+                      /* @__PURE__ */ jsx("p", { className: "font-medium text-neutral-900 dark:text-white", children: "Order History" }),
+                      /* @__PURE__ */ jsx("p", { className: "text-sm text-neutral-500 dark:text-neutral-400", children: "Review past orders" })
+                    ] })
+                  ]
+                }
+              ),
+              /* @__PURE__ */ jsxs(
+                Link,
+                {
                   href: "/profile",
                   className: "flex items-center gap-4 p-4 bg-neutral-50 dark:bg-neutral-800 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors",
                   children: [
