@@ -22,9 +22,16 @@ class CheckoutController extends Controller
             $responseBody = $response->getBody()->getContents();
             $paymentGateways = json_decode($responseBody, true);
 
-            // Filter the payment gateways to return only those that are enabled
+            // Filter the payment gateways to return only those that are enabled (exclude PayPal)
             $enabledGateways = array_filter($paymentGateways, function ($gateway) {
-                return isset($gateway['enabled']) && $gateway['enabled'] === true && $gateway['title'] !== '';
+                if (!isset($gateway['enabled']) || $gateway['enabled'] !== true || $gateway['title'] === '') {
+                    return false;
+                }
+
+                $id = strtolower((string) ($gateway['id'] ?? ''));
+                $title = strtolower((string) ($gateway['title'] ?? ''));
+
+                return !str_contains($id, 'paypal') && !str_contains($title, 'paypal');
             });
 
             // Re-index array to remove keys
