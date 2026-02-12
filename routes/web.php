@@ -5,8 +5,12 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderHistoryController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\SitemapController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+// SEO: XML Sitemap
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [

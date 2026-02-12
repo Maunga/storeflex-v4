@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { PageProps, Bookmark } from '@/types';
 import SidebarBookmarks, { BookmarksDrawer } from '@/Components/SidebarBookmarks';
+import SEO from '@/Components/SEO';
 import axios from 'axios';
 
 export default function Terms({ auth }: PageProps) {
@@ -18,7 +19,11 @@ export default function Terms({ auth }: PageProps) {
 
     return (
         <>
-            <Head title="Terms & Conditions" />
+            <SEO 
+                title="Terms & Conditions"
+                description="Read Storeflex terms and conditions for dropshipping services from Dubai to Zimbabwe. Learn about our shipping policies, returns, and customer service guarantees."
+                keywords="terms and conditions, shipping policy Zimbabwe, dropshipping terms, Storeflex policies, Dubai to Zimbabwe shipping terms"
+            />
 
             <div className="flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950">
                 {/* Sidebar for logged in users */}

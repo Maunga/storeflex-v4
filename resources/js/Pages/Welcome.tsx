@@ -3,6 +3,7 @@ import { Head, Link, router, usePage, useRemember } from '@inertiajs/react';
 import { PageProps, Bookmark } from '@/types';
 import Toast from '@/Components/Toast';
 import SidebarBookmarks, { BookmarksDrawer } from '@/Components/SidebarBookmarks';
+import SEO from '@/Components/SEO';
 import axios from 'axios';
 
 interface MarketingStatement {
@@ -110,7 +111,11 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
 
     return (
         <>
-            <Head title="Your Dropshipping Assistant" />
+            <SEO 
+                title="Shop Premium Products from Dubai | Delivered to Zimbabwe"
+                description="Discover amazing products from Amazon UAE delivered straight to Zimbabwe. Fast, reliable dropshipping with authentic products at competitive prices. Shop electronics, fashion, home goods and more."
+                keywords="dropshipping Zimbabwe, Dubai to Zimbabwe shipping, Amazon UAE Zimbabwe, online shopping Zimbabwe, import from Dubai, Storeflex, Zimbabwe online store, UAE products delivery, Dubai shopping Zimbabwe"
+            />
             <Toast message={toastMessage} type={toastType} onDismiss={() => setToastMessage(null)} />
 
             {/* Loading Overlay */}

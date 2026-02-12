@@ -1,2 +1,38 @@
+# Storeflex - Dubai to Zimbabwe Dropshipping
+# https://storeflex.com
+
 User-agent: *
-Disallow:
+Allow: /
+Allow: /search
+Allow: /product/
+
+# Disallow admin and private areas
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /checkout/
+Disallow: /orders
+Disallow: /bookmarks
+Disallow: /login
+Disallow: /register
+Disallow: /password/
+Disallow: /api/
+
+# Disallow query parameters that create duplicate content
+Disallow: /*?*sort=
+Disallow: /*?*page=
+
+# Crawl-delay for respectful crawling
+Crawl-delay: 1
+
+# Sitemap location
+Sitemap: https://storeflex.com/sitemap.xml
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1

@@ -5,7 +5,33 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Storeflex') }} - Your Dropshipping Assistant</title>
+        <title>{{ config('app.name', 'Storeflex') }} - Premium Dropshipping from Dubai to Zimbabwe</title>
+
+        <!-- Primary SEO Meta Tags -->
+        <meta name="title" content="Storeflex - Premium Dropshipping from Dubai to Zimbabwe">
+        <meta name="description" content="Shop premium products from Dubai delivered to Zimbabwe. Storeflex offers fast, reliable dropshipping services with authentic products from Amazon UAE at competitive prices.">
+        <meta name="keywords" content="dropshipping Zimbabwe, Dubai to Zimbabwe shipping, Amazon UAE products Zimbabwe, online shopping Zimbabwe, import from Dubai, Storeflex">
+        <meta name="robots" content="index, follow">
+        <meta name="author" content="Storeflex">
+        <meta name="geo.region" content="ZW">
+
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="{{ url()->current() }}">
+        <meta property="og:title" content="Storeflex - Premium Dropshipping from Dubai to Zimbabwe">
+        <meta property="og:description" content="Shop premium products from Dubai delivered to Zimbabwe. Fast, reliable dropshipping with authentic products.">
+        <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+        <meta property="og:site_name" content="Storeflex">
+
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="{{ url()->current() }}">
+        <meta property="twitter:title" content="Storeflex - Premium Dropshipping from Dubai to Zimbabwe">
+        <meta property="twitter:description" content="Shop premium products from Dubai delivered to Zimbabwe.">
+        <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
+
+        <!-- Canonical URL -->
+        <link rel="canonical" href="{{ url()->current() }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { PageProps, Bookmark } from '@/types';
+import SEO from '@/Components/SEO';
 import axios from 'axios';
 
 const getGreeting = (): string => {
@@ -27,7 +28,11 @@ export default function Dashboard({ auth }: PageProps) {
 
     return (
         <>
-            <Head title="Dashboard" />
+            <SEO 
+                title="Dashboard"
+                description="Manage your Storeflex account. Track orders, view bookmarks, and shop premium products from Dubai delivered to Zimbabwe."
+                keywords="dashboard, account, orders, bookmarks, Storeflex Zimbabwe"
+            />
 
             <div className="flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950">
                 {/* Sidebar */}

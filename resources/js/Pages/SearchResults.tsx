@@ -4,6 +4,7 @@ import { PageProps, SearchResultItem, Bookmark } from '@/types';
 import axios from 'axios';
 import NProgress from 'nprogress';
 import SidebarBookmarks, { BookmarksDrawer } from '@/Components/SidebarBookmarks';
+import SEO from '@/Components/SEO';
 
 type SortOption = 'relevant' | 'price_low' | 'price_high' | 'rating';
 
@@ -107,7 +108,11 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
 
     return (
         <>
-            <Head title={`Search: ${query}`} />
+            <SEO 
+                title={`Search: ${query} - Products from Dubai`}
+                description={`Find ${query} products shipped from Dubai to Zimbabwe. Browse ${results.length} results with competitive prices and fast delivery from Amazon UAE.`}
+                keywords={`${query}, buy ${query} Zimbabwe, Dubai shipping, Amazon UAE products, online shopping Zimbabwe`}
+            />
 
             <div className="flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950">
                 {/* Sidebar */}
