@@ -1,4 +1,4 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, useRef, FormEvent } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { PageProps, ProductData } from '@/types';
 import Toast from '@/Components/Toast';
@@ -59,6 +59,11 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
     const [toastType, setToastType] = useState<'error' | 'success' | 'info'>('info');
     const [orderSuccess, setOrderSuccess] = useState<OrderSuccessSummary | null>(null);
     const [deliveryMethod, setDeliveryMethod] = useState<'delivery' | 'pickup'>('pickup');
+    const [shippingSpeed, setShippingSpeed] = useState<'regular' | 'express'>('regular');
+
+    const basePrice = parseFloat(String(product.dxb_price ?? product.price ?? 0)) || 0;
+    const shippingFee = shippingSpeed === 'express' ? 5 : 0;
+    const totalPrice = basePrice + shippingFee;
     
     const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
         first_name: savedCheckoutData.shipping?.first_name || '',
@@ -104,16 +109,56 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
     );
     const [useExpressCheckout, setUseExpressCheckout] = useState(hasSavedDetails);
     const [showSavedDetailsCard, setShowSavedDetailsCard] = useState(hasSavedDetails);
+    const prevShippingContactRef = useRef({
+        first_name: shippingInfo.first_name,
+        last_name: shippingInfo.last_name,
+        email: shippingInfo.email,
+        phone: shippingInfo.phone,
+    });
 
     useEffect(() => {
         loadAgentsAndPaymentMethods();
     }, []);
 
     useEffect(() => {
-        if (sameAsShipping) {
-            setBillingInfo(shippingInfo);
+        const prevContact = prevShippingContactRef.current;
+
+        setBillingInfo((prev) => {
+            const updates: Partial<ShippingInfo> = {};
+
+            if (prev.first_name === prevContact.first_name) {
+                updates.first_name = shippingInfo.first_name;
+            }
+            if (prev.last_name === prevContact.last_name) {
+                updates.last_name = shippingInfo.last_name;
+            }
+            if (prev.email === prevContact.email) {
+                updates.email = shippingInfo.email;
+            }
+            if (prev.phone === prevContact.phone) {
+                updates.phone = shippingInfo.phone;
+            }
+
+            if (Object.keys(updates).length === 0) {
+                return prev;
+            }
+
+            return { ...prev, ...updates };
+        });
+
+        prevShippingContactRef.current = {
+            first_name: shippingInfo.first_name,
+            last_name: shippingInfo.last_name,
+            email: shippingInfo.email,
+            phone: shippingInfo.phone,
+        };
+    }, [shippingInfo.first_name, shippingInfo.last_name, shippingInfo.email, shippingInfo.phone]);
+
+    useEffect(() => {
+        if (deliveryMethod === 'pickup' && sameAsShipping) {
+            setSameAsShipping(false);
         }
-    }, [sameAsShipping, shippingInfo]);
+    }, [deliveryMethod, sameAsShipping]);
 
     async function loadAgentsAndPaymentMethods() {
         try {
@@ -172,6 +217,11 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                     agent: {
                         ID: selectedAgent.ID,
                         display_name: selectedAgent.display_name,
+                    },
+                    shipping_speed: {
+                        id: shippingSpeed,
+                        title: shippingSpeed === 'express' ? 'Express' : 'Regular',
+                        fee: shippingFee,
                     },
                 },
             };
@@ -611,6 +661,55 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                                 </label>
                                             </div>
                                         </div>
+
+                                        {/* Shipping Speed Selection */}
+                                        <div className="mb-6">
+                                            <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
+                                                Shipping Speed
+                                            </label>
+                                            <div className="grid grid-cols-2 gap-3">
+                                                <label
+                                                    className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                                        shippingSpeed === 'regular'
+                                                            ? 'border-[#86efac] bg-[#86efac]/10'
+                                                            : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600'
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="shippingSpeed"
+                                                        value="regular"
+                                                        checked={shippingSpeed === 'regular'}
+                                                        onChange={() => setShippingSpeed('regular')}
+                                                        className="w-4 h-4 text-emerald-600 focus:ring-2 focus:ring-[#86efac]"
+                                                    />
+                                                    <div>
+                                                        <div className="font-medium text-neutral-900 dark:text-white">Regular</div>
+                                                        <div className="text-xs text-neutral-500 dark:text-neutral-400">Free</div>
+                                                    </div>
+                                                </label>
+                                                <label
+                                                    className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                                                        shippingSpeed === 'express'
+                                                            ? 'border-[#86efac] bg-[#86efac]/10'
+                                                            : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600'
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="radio"
+                                                        name="shippingSpeed"
+                                                        value="express"
+                                                        checked={shippingSpeed === 'express'}
+                                                        onChange={() => setShippingSpeed('express')}
+                                                        className="w-4 h-4 text-emerald-600 focus:ring-2 focus:ring-[#86efac]"
+                                                    />
+                                                    <div>
+                                                        <div className="font-medium text-neutral-900 dark:text-white">Express</div>
+                                                        <div className="text-xs text-neutral-500 dark:text-neutral-400">$5 extra</div>
+                                                    </div>
+                                                </label>
+                                            </div>
+                                        </div>
                                         
                                         <div className="grid grid-cols-2 gap-4">
                                             <div>
@@ -664,6 +763,37 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                                 className="w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-[#86efac] focus:border-transparent"
                                             />
                                         </div>
+
+                                        {/* City field for pickup - required */}
+                                        {deliveryMethod === 'pickup' && (
+                                            <div>
+                                                <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                                                    City
+                                                </label>
+                                                <select
+                                                    required
+                                                    value={shippingInfo.city}
+                                                    onChange={(e) => setShippingInfo({...shippingInfo, city: e.target.value})}
+                                                    className="w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-[#86efac] focus:border-transparent"
+                                                >
+                                                    <option value="" disabled>
+                                                        Select a city
+                                                    </option>
+                                                    <option value="Harare">Harare</option>
+                                                    <option value="Bulawayo">Bulawayo</option>
+                                                    <option value="Chitungwiza">Chitungwiza</option>
+                                                    <option value="Mutare">Mutare</option>
+                                                    <option value="Gweru">Gweru</option>
+                                                    <option value="Kwekwe">Kwekwe</option>
+                                                    <option value="Kadoma">Kadoma</option>
+                                                    <option value="Masvingo">Masvingo</option>
+                                                    <option value="Victoria Falls">Victoria Falls</option>
+                                                    <option value="Hwange">Hwange</option>
+                                                    <option value="Marondera">Marondera</option>
+                                                    <option value="Chinhoyi">Chinhoyi</option>
+                                                </select>
+                                            </div>
+                                        )}
 
                                         {/* Address fields - only show for delivery */}
                                         {deliveryMethod === 'delivery' && (
@@ -773,19 +903,21 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                     <form onSubmit={handleBillingSubmit} className="space-y-4">
                                         <h3 className="text-lg font-semibold text-neutral-900 dark:text-white mb-4">Billing Information</h3>
                                         
-                                        <label className="flex items-center gap-2 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={sameAsShipping}
-                                                onChange={(e) => setSameAsShipping(e.target.checked)}
-                                                className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-emerald-600 focus:ring-2 focus:ring-[#86efac]"
-                                            />
-                                            <span className="text-sm text-neutral-700 dark:text-neutral-300">
-                                                Same as shipping address
-                                            </span>
-                                        </label>
+                                        {deliveryMethod === 'delivery' && (
+                                            <label className="flex items-center gap-2 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={sameAsShipping}
+                                                    onChange={(e) => setSameAsShipping(e.target.checked)}
+                                                    className="w-4 h-4 rounded border-neutral-300 dark:border-neutral-600 text-emerald-600 focus:ring-2 focus:ring-[#86efac]"
+                                                />
+                                                <span className="text-sm text-neutral-700 dark:text-neutral-300">
+                                                    Same as shipping address
+                                                </span>
+                                            </label>
+                                        )}
 
-                                        {!sameAsShipping && (
+                                        {(deliveryMethod === 'pickup' || !sameAsShipping) && (
                                             <div className="space-y-4 mt-4">
                                                 <div className="grid grid-cols-2 gap-4">
                                                     <div>
@@ -1112,13 +1244,13 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                     <div className="flex justify-between text-sm">
                                         <span className="text-neutral-600 dark:text-neutral-400">Subtotal</span>
                                         <span className="text-neutral-900 dark:text-white font-medium">
-                                            ${product.dxb_price || product.price || '0'}
+                                            ${basePrice.toFixed(2)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-sm">
                                         <span className="text-neutral-600 dark:text-neutral-400">Shipping</span>
                                         <span className="text-neutral-900 dark:text-white font-medium">
-                                            Included
+                                            {shippingFee > 0 ? `$${shippingFee.toFixed(2)}` : 'Free'}
                                         </span>
                                     </div>
                                 </div>
@@ -1127,7 +1259,7 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                     <div className="flex justify-between">
                                         <span className="text-lg font-semibold text-neutral-900 dark:text-white">Total</span>
                                         <span className="text-lg font-bold text-emerald-600 dark:text-[#86efac]">
-                                            ${product.dxb_price || product.price || '0'}
+                                            ${totalPrice.toFixed(2)}
                                         </span>
                                     </div>
                                     <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">

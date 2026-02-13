@@ -91,7 +91,7 @@ services:
         networks:
             - sail
     queue:
-        image: ariaieboy/sail-runtime-image:8.5
+        image: ariaieboy/sail-runtime-image:8.4
         extra_hosts:
             - 'host.docker.internal:host-gateway'
         environment:

@@ -35,7 +35,7 @@ class CheckoutApiController extends Controller
             'shipping.last_name' => 'required|string',
             'shipping.address_1' => $isPickup ? 'nullable|string' : 'required|string',
             'shipping.address_2' => 'nullable|string',
-            'shipping.city' => $isPickup ? 'nullable|string' : 'required|string',
+            'shipping.city' => 'required|string', // Required for both: delivery address or pickup location
             'shipping.state' => 'nullable|string',
             'shipping.postcode' => $isPickup ? 'nullable|string' : 'required|string',
             'shipping.country' => $isPickup ? 'nullable|string' : 'required|string',
@@ -59,6 +59,10 @@ class CheckoutApiController extends Controller
             'extras.agent' => 'required|array',
             'extras.agent.ID' => 'required|string',
             'extras.agent.display_name' => 'required|string',
+            'extras.shipping_speed' => 'required|array',
+            'extras.shipping_speed.id' => 'required|in:regular,express',
+            'extras.shipping_speed.title' => 'required|string',
+            'extras.shipping_speed.fee' => 'required|numeric|min:0',
         ]);
 
         $asin = $validated['asin'];
@@ -122,6 +126,37 @@ class CheckoutApiController extends Controller
             return array_map(fn($value) => $value ?? '', $address);
         };
 
+        // Build shipping lines based on shipping speed selection
+        $productName = $product['title'] ?? 'Unknown Product';
+        $itemsValue = "{$productName} &times; {$quantity}";
+        $shippingSpeed = $validated['extras']['shipping_speed'];
+        $isExpress = $shippingSpeed['id'] === 'express';
+
+        $shipping_lines = [
+            [
+                'method_title' => $isExpress ? 'Express Cargo (48hrs)' : 'Regular Cargo',
+                'method_id' => 'flat_rate',
+                'instance_id' => '4',
+                'total' => $isExpress ? '5.00' : '0.00',
+                'total_tax' => '0.00',
+                'taxes' => [],
+                'meta_data' => [
+                    [
+                        'key' => 'Items',
+                        'value' => $itemsValue,
+                        'display_key' => 'Items',
+                        'display_value' => $itemsValue,
+                    ],
+                    [
+                        'key' => 'seller_id',
+                        'value' => '1',
+                        'display_key' => 'seller_id',
+                        'display_value' => '1',
+                    ],
+                ],
+            ],
+        ];
+
         $prepared_data = [
             'payment_method' => $validated['extras']['payment_method']['id'],
             'payment_method_title' => $validated['extras']['payment_method']['title'],
@@ -135,10 +170,19 @@ class CheckoutApiController extends Controller
                     'key' => 'agent_name',
                     'value' => $validated['extras']['agent']['display_name']
                 ],
+                [
+                    'key' => 'delivery_method',
+                    'value' => $validated['delivery_method']
+                ],
+                [
+                    'key' => 'pickup_city',
+                    'value' => $isPickup ? $validated['shipping']['city'] : ''
+                ],
             ],
             'billing' => $sanitizeAddress($validated['billing']),
             'shipping' => $sanitizeAddress($validated['shipping']),
             'line_items' => $line_items->toArray(),
+            'shipping_lines' => $shipping_lines,
         ];
 
         Log::info('Checkout: Creating WooCommerce order', ['data' => $prepared_data]);

@@ -6,19 +6,6 @@ interface SEOProps {
     keywords?: string;
     image?: string;
     type?: 'website' | 'product' | 'article';
-    price?: string;
-    currency?: string;
-    availability?: 'InStock' | 'OutOfStock' | 'PreOrder';
-    productData?: {
-        name: string;
-        description: string;
-        image: string;
-        price: string;
-        currency: string;
-        sku?: string;
-        brand?: string;
-        availability?: string;
-    };
 }
 
 const defaultMeta = {
@@ -34,7 +21,6 @@ export default function SEO({
     keywords,
     image,
     type = 'website',
-    productData,
 }: SEOProps) {
     const pageTitle = title 
         ? `${title} | Storeflex - Dubai to Zimbabwe Dropshipping`
@@ -44,8 +30,7 @@ export default function SEO({
     const pageImage = image || defaultMeta.image;
 
     return (
-        <Head>
-            <title>{pageTitle}</title>
+        <Head title={pageTitle}>
             <meta name="description" content={pageDescription} />
             <meta name="keywords" content={pageKeywords} />
             
@@ -59,102 +44,6 @@ export default function SEO({
             <meta name="twitter:title" content={pageTitle} />
             <meta name="twitter:description" content={pageDescription} />
             <meta name="twitter:image" content={pageImage} />
-            
-            {/* Product-specific structured data */}
-            {productData && (
-                <script type="application/ld+json">
-                    {JSON.stringify({
-                        '@context': 'https://schema.org',
-                        '@type': 'Product',
-                        name: productData.name,
-                        description: productData.description,
-                        image: productData.image,
-                        sku: productData.sku,
-                        brand: {
-                            '@type': 'Brand',
-                            name: productData.brand || 'Various',
-                        },
-                        offers: {
-                            '@type': 'Offer',
-                            price: productData.price,
-                            priceCurrency: productData.currency || 'USD',
-                            availability: `https://schema.org/${productData.availability || 'InStock'}`,
-                            seller: {
-                                '@type': 'Organization',
-                                name: 'Storeflex',
-                            },
-                            shippingDetails: {
-                                '@type': 'OfferShippingDetails',
-                                shippingDestination: {
-                                    '@type': 'DefinedRegion',
-                                    addressCountry: 'ZW',
-                                },
-                                deliveryTime: {
-                                    '@type': 'ShippingDeliveryTime',
-                                    handlingTime: {
-                                        '@type': 'QuantitativeValue',
-                                        minValue: 1,
-                                        maxValue: 3,
-                                        unitCode: 'DAY',
-                                    },
-                                    transitTime: {
-                                        '@type': 'QuantitativeValue',
-                                        minValue: 7,
-                                        maxValue: 14,
-                                        unitCode: 'DAY',
-                                    },
-                                },
-                            },
-                        },
-                    })}
-                </script>
-            )}
-        </Head>
-    );
-}
-
-// Breadcrumb component for SEO
-export function BreadcrumbSchema({ items }: { items: { name: string; url: string }[] }) {
-    const breadcrumbData = {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: items.map((item, index) => ({
-            '@type': 'ListItem',
-            position: index + 1,
-            name: item.name,
-            item: item.url,
-        })),
-    };
-
-    return (
-        <Head>
-            <script type="application/ld+json">
-                {JSON.stringify(breadcrumbData)}
-            </script>
-        </Head>
-    );
-}
-
-// FAQ Schema for help pages
-export function FAQSchema({ faqs }: { faqs: { question: string; answer: string }[] }) {
-    const faqData = {
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        mainEntity: faqs.map((faq) => ({
-            '@type': 'Question',
-            name: faq.question,
-            acceptedAnswer: {
-                '@type': 'Answer',
-                text: faq.answer,
-            },
-        })),
-    };
-
-    return (
-        <Head>
-            <script type="application/ld+json">
-                {JSON.stringify(faqData)}
-            </script>
         </Head>
     );
 }

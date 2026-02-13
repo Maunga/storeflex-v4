@@ -43,14 +43,14 @@
         <!-- Structured Data - Organization -->
         <script type="application/ld+json">
         {
-            "@context": "https://schema.org",
-            "@type": "Organization",
+            "@@context": "https://schema.org",
+            "@@type": "Organization",
             "name": "Storeflex",
             "description": "Premium dropshipping service from Dubai to Zimbabwe",
             "url": "{{ config('app.url') }}",
             "logo": "{{ asset('images/logo.png') }}",
             "contactPoint": {
-                "@type": "ContactPoint",
+                "@@type": "ContactPoint",
                 "contactType": "customer service",
                 "areaServed": "ZW"
             },
@@ -61,15 +61,15 @@
         <!-- Structured Data - WebSite with SearchAction -->
         <script type="application/ld+json">
         {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
+            "@@context": "https://schema.org",
+            "@@type": "WebSite",
             "name": "Storeflex",
             "url": "{{ config('app.url') }}",
             "description": "Shop premium products from Dubai delivered to Zimbabwe",
             "potentialAction": {
-                "@type": "SearchAction",
+                "@@type": "SearchAction",
                 "target": {
-                    "@type": "EntryPoint",
+                    "@@type": "EntryPoint",
                     "urlTemplate": "{{ config('app.url') }}/search?q={search_term_string}"
                 },
                 "query-input": "required name=search_term_string"
@@ -80,39 +80,39 @@
         <!-- Structured Data - E-commerce Store -->
         <script type="application/ld+json">
         {
-            "@context": "https://schema.org",
-            "@type": "Store",
+            "@@context": "https://schema.org",
+            "@@type": "Store",
             "name": "Storeflex",
             "description": "Premium dropshipping from Dubai to Zimbabwe - Shop authentic products from Amazon UAE",
             "url": "{{ config('app.url') }}",
             "priceRange": "$$",
             "currencyAccepted": "USD",
             "areaServed": {
-                "@type": "Country",
+                "@@type": "Country",
                 "name": "Zimbabwe"
             },
             "hasOfferCatalog": {
-                "@type": "OfferCatalog",
+                "@@type": "OfferCatalog",
                 "name": "Products from Dubai",
                 "itemListElement": [
                     {
-                        "@type": "Offer",
+                        "@@type": "Offer",
                         "itemOffered": {
-                            "@type": "Product",
+                            "@@type": "Product",
                             "name": "Electronics & Gadgets"
                         }
                     },
                     {
-                        "@type": "Offer",
+                        "@@type": "Offer",
                         "itemOffered": {
-                            "@type": "Product",
+                            "@@type": "Product",
                             "name": "Fashion & Accessories"
                         }
                     },
                     {
-                        "@type": "Offer",
+                        "@@type": "Offer",
                         "itemOffered": {
-                            "@type": "Product",
+                            "@@type": "Product",
                             "name": "Home & Living"
                         }
                     }
