@@ -346,7 +346,7 @@ function Product({ auth, product, identifier, canLogin, canRegister }) {
                   /* @__PURE__ */ jsx("span", { className: "text-sm font-medium", children: product.stock })
                 ] })
               ] }),
-              /* @__PURE__ */ jsxs(
+              product.price != null && product.price > 0 && product.stock !== "Currently unavailable" && !product.stock?.toLowerCase().startsWith("temporarily out of stock") && /* @__PURE__ */ jsxs(
                 Link,
                 {
                   href: `/checkout/${identifier}`,

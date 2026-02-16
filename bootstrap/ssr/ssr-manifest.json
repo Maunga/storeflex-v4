@@ -1,11 +1,11 @@
 {
   "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
   "node_modules/yet-another-react-lightbox/dist/plugins/thumbnails/thumbnails.css": [
-    "/build/assets/Product-Bgl0BlLp.js",
+    "/build/assets/Product-SzH_ENBO.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "node_modules/yet-another-react-lightbox/dist/styles.css": [
-    "/build/assets/Product-Bgl0BlLp.js",
+    "/build/assets/Product-SzH_ENBO.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "resources/js/Components/SEO.tsx": [
@@ -39,7 +39,7 @@
     "/build/assets/Orders-CVG99Zp2.js"
   ],
   "resources/js/Pages/Product.tsx": [
-    "/build/assets/Product-Bgl0BlLp.js",
+    "/build/assets/Product-SzH_ENBO.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "resources/js/Pages/Profile.tsx": [
@@ -52,7 +52,7 @@
     "/build/assets/Terms-CA2iqGMr.js"
   ],
   "resources/js/Pages/Welcome.tsx": [
-    "/build/assets/Welcome-DJa_PWOu.js"
+    "/build/assets/Welcome-h5xknyXT.js"
   ],
   "resources/js/ssr.tsx": []
 }
