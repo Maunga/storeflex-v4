@@ -191,6 +191,40 @@ class BaseUtil
     }
 
     /**
+     * Updates an existing order in WooCommerce.
+     *
+     * @param int|string $order_id The WooCommerce order ID
+     * @param array $payload The updated data for the order
+     * @return array|string The API response or error message
+     */
+    public static function updateWooCommerceOrder($order_id, array $payload)
+    {
+        try {
+            $client = new Client([
+                'base_uri' => config('app.woocommerce_url'),
+                'headers' => [
+                    'Authorization' => 'Basic ' . config('app.woocommerce_api_token'),
+                    'Content-Type' => 'application/json',
+                ],
+            ]);
+
+            Log::debug('Updating WooCommerce order', ['order_id' => $order_id, 'payload' => $payload]);
+
+            $response = $client->request('PUT', "wp-json/wc/v3/orders/{$order_id}", [
+                'body' => json_encode($payload),
+            ]);
+
+            $responseBody = $response->getBody()->getContents();
+            Log::debug('WooCommerce order update response', ['response' => $responseBody]);
+
+            return json_decode($responseBody, true);
+        } catch (GuzzleException $e) {
+            Log::error('Error updating WooCommerce order', ['error' => $e->getMessage(), 'order_id' => $order_id]);
+            return ['error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Convert validation errors to a human-readable string.
      *
      * @param MessageBag $errors

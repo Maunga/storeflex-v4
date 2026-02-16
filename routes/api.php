@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\CheckoutApiController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\MarketingController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProductRetrievalController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\ViewController;
@@ -20,6 +21,17 @@ Route::group(['prefix' => 'checkout'], function () {
     Route::get('/payment-methods', [CheckoutController::class, 'payment_methods']);
     Route::get('/agents', [CheckoutController::class, 'agents']);
     Route::post('/process', [CheckoutApiController::class, 'process']); // Unified checkout endpoint
+});
+
+Route::group(['prefix' => 'payments'], function () {
+    Route::get('/methods', [PaymentController::class, 'methods']);
+    Route::post('/initiate', [PaymentController::class, 'initiate']);
+    Route::post('/status', [PaymentController::class, 'status']);
+    
+    // Webhooks (no CSRF)
+    Route::post('/paynow/webhook', [PaymentController::class, 'paynowWebhook']);
+    Route::post('/stripe/webhook', [PaymentController::class, 'stripeWebhook']);
+    Route::post('/paypal/webhook', [PaymentController::class, 'paypalWebhook']);
 });
 
 Route::group(['prefix' => 'marketing'], function () {

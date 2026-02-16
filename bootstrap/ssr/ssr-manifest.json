@@ -1,12 +1,15 @@
 {
   "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
   "node_modules/yet-another-react-lightbox/dist/plugins/thumbnails/thumbnails.css": [
-    "/build/assets/Product-DevvDLGi.js",
+    "/build/assets/Product-Bgl0BlLp.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "node_modules/yet-another-react-lightbox/dist/styles.css": [
-    "/build/assets/Product-DevvDLGi.js",
+    "/build/assets/Product-Bgl0BlLp.js",
     "/build/assets/Product-nKqu9Wxg.css"
+  ],
+  "resources/js/Components/SEO.tsx": [
+    "/build/assets/SEO-_RAcpsXN.js"
   ],
   "resources/js/Components/SidebarBookmarks.tsx": [
     "/build/assets/SidebarBookmarks-DXCEFl9f.js"
@@ -24,29 +27,32 @@
     "/build/assets/Register-DnRTAzLg.js"
   ],
   "resources/js/Pages/Checkout.tsx": [
-    "/build/assets/Checkout-HdFf1GgX.js"
+    "/build/assets/Checkout-Bcr88o9k.js"
+  ],
+  "resources/js/Pages/CheckoutSuccess.tsx": [
+    "/build/assets/CheckoutSuccess-ptkF0Q7U.js"
   ],
   "resources/js/Pages/Dashboard.tsx": [
-    "/build/assets/Dashboard-Ctqo3yEv.js"
+    "/build/assets/Dashboard-CyVUT-jR.js"
   ],
   "resources/js/Pages/Orders.tsx": [
     "/build/assets/Orders-CVG99Zp2.js"
   ],
   "resources/js/Pages/Product.tsx": [
-    "/build/assets/Product-DevvDLGi.js",
+    "/build/assets/Product-Bgl0BlLp.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "resources/js/Pages/Profile.tsx": [
     "/build/assets/Profile-B2UNc_rF.js"
   ],
   "resources/js/Pages/SearchResults.tsx": [
-    "/build/assets/SearchResults-DlZSc9xz.js"
+    "/build/assets/SearchResults-CLUSRU4R.js"
   ],
   "resources/js/Pages/Terms.tsx": [
-    "/build/assets/Terms-B4w5uqCm.js"
+    "/build/assets/Terms-CA2iqGMr.js"
   ],
   "resources/js/Pages/Welcome.tsx": [
-    "/build/assets/Welcome-CaoYrMzp.js"
+    "/build/assets/Welcome-DJa_PWOu.js"
   ],
   "resources/js/ssr.tsx": []
 }

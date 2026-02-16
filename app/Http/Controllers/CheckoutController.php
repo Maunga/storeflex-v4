@@ -176,4 +176,30 @@ class CheckoutController extends Controller
 
         return response()->json(['success' => true, 'message' => 'Checkout profile saved']);
     }
+
+    /**
+     * Show the checkout success page
+     */
+    public function success(Request $request): Response
+    {
+        $reference = $request->query('reference');
+        $provider = $request->query('provider');
+
+        $order = null;
+        if ($reference) {
+            $order = Order::findByPaymentReference($reference);
+        }
+
+        return Inertia::render('CheckoutSuccess', [
+            'reference' => $reference,
+            'provider' => $provider,
+            'order' => $order ? [
+                'id' => $order->id,
+                'total' => $order->total,
+                'currency' => $order->currency ?? 'USD',
+                'amount_paid' => $order->amount_paid ?? 0,
+                'status' => $order->status,
+            ] : null,
+        ]);
+    }
 }

@@ -22,6 +22,9 @@ interface PaymentMethod {
     id: string;
     title: string;
     description: string;
+    icon?: string;
+    type?: 'cash' | 'mobile_push' | 'redirect';
+    requires_phone?: boolean;
 }
 
 interface ShippingInfo {
@@ -109,6 +112,20 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
     );
     const [useExpressCheckout, setUseExpressCheckout] = useState(hasSavedDetails);
     const [showSavedDetailsCard, setShowSavedDetailsCard] = useState(hasSavedDetails);
+    
+    // Payment processing state
+    const [paymentProcessing, setPaymentProcessing] = useState(false);
+    const [paymentPollUrl, setPaymentPollUrl] = useState<string | null>(null);
+    const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
+    const [pendingOrderReference, setPendingOrderReference] = useState<string | null>(null);
+    
+    // Payment percentage modal state
+    const [showPaymentPercentageModal, setShowPaymentPercentageModal] = useState(false);
+    const [selectedPaymentPercentage, setSelectedPaymentPercentage] = useState<75 | 100>(100);
+    
+    // EcoCash phone number state
+    const [ecocashPhone, setEcocashPhone] = useState('');
+    
     const prevShippingContactRef = useRef({
         first_name: shippingInfo.first_name,
         last_name: shippingInfo.last_name,
@@ -160,11 +177,19 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
         }
     }, [deliveryMethod, sameAsShipping]);
 
+    // Update ecocash phone when shipping phone changes (if ecocash phone is empty)
+    useEffect(() => {
+        // Only auto-populate if we have a valid phone number (not just "0" or similar)
+        if (!ecocashPhone && shippingInfo.phone && shippingInfo.phone.length > 3) {
+            setEcocashPhone('');
+        }
+    }, [shippingInfo.phone]);
+
     async function loadAgentsAndPaymentMethods() {
         try {
             const [agentsResponse, paymentMethodsResponse] = await Promise.all([
                 axios.get('/api/checkout/agents'),
-                axios.get('/api/checkout/payment-methods')
+                axios.get('/api/payments/methods')
             ]);
             const agentsData = agentsResponse.data;
             const paymentMethodsData = paymentMethodsResponse.data;
@@ -200,9 +225,33 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
             return;
         }
 
+        // For EcoCash, phone is required
+        if (selectedPaymentMethod.requires_phone && !ecocashPhone) {
+            setToastType('error');
+            setToastMessage('Please enter your EcoCash phone number');
+            return;
+        }
+
+        // For cash payments, proceed directly without payment percentage modal
+        if (selectedPaymentMethod.type === 'cash') {
+            await processOrderWithPayment(100);
+            return;
+        }
+
+        // For non-cash payments, show the payment percentage modal
+        setShowPaymentPercentageModal(true);
+    };
+
+    const processOrderWithPayment = async (paymentPercentage: 75 | 100) => {
+        setShowPaymentPercentageModal(false);
         setLoading(true);
+        setPaymentProcessing(false);
+        setPaymentMessage(null);
+        
+        const paymentAmount = paymentPercentage === 100 ? totalPrice : totalPrice * 0.75;
+        
         try {
-            // Prepare checkout data for unified API
+            // Prepare checkout data
             const checkoutData = {
                 asin: identifier,
                 quantity: 1,
@@ -211,18 +260,19 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                 billing: sameAsShipping ? shippingInfo : billingInfo,
                 extras: {
                     payment_method: {
-                        id: selectedPaymentMethod.id,
-                        title: selectedPaymentMethod.title,
+                        id: selectedPaymentMethod!.id,
+                        title: selectedPaymentMethod!.title,
                     },
                     agent: {
-                        ID: selectedAgent.ID,
-                        display_name: selectedAgent.display_name,
+                        ID: selectedAgent!.ID,
+                        display_name: selectedAgent!.display_name,
                     },
                     shipping_speed: {
                         id: shippingSpeed,
                         title: shippingSpeed === 'express' ? 'Express' : 'Regular',
                         fee: shippingFee,
                     },
+                    payment_percentage: paymentPercentage,
                 },
             };
 
@@ -238,19 +288,21 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                 }
             }
 
-            // Call unified checkout API (uploads to WooCommerce + creates order)
-            const response = await axios.post('/api/checkout/process', checkoutData);
+            // For CASH payments: Create order directly (order-first flow)
+            if (selectedPaymentMethod!.type === 'cash') {
+                const response = await axios.post('/api/checkout/process', checkoutData);
 
-            if (response.data.success) {
-                setToastType('success');
-                setToastMessage('Order placed successfully!');
+                if (!response.data.success) {
+                    throw new Error(response.data.message || 'Order failed');
+                }
 
                 const orderData = response.data.data?.order ?? null;
+                
                 setOrderSuccess({
                     orderId: orderData?.id ?? null,
                     wooOrderId: response.data.data?.woocommerce_order_id ?? null,
                     total: orderData?.total ?? null,
-                    paymentMethod: selectedPaymentMethod.title,
+                    paymentMethod: selectedPaymentMethod!.title,
                     deliveryMethod,
                     shipping: shippingInfo,
                     billing: sameAsShipping ? shippingInfo : billingInfo,
@@ -258,15 +310,127 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                     productTitle: product.title ?? 'Order Item',
                     productImage: product.images?.[0] ?? '/placeholder.png',
                 });
-            } else {
-                throw new Error(response.data.message || 'Order failed');
+                setLoading(false);
+                return;
             }
+
+            // For NON-CASH payments: Initiate payment FIRST (payment-first flow)
+            // Generate a temporary reference for the payment
+            const tempReference = `SF-${Date.now()}`;
+            setPendingOrderReference(tempReference);
+
+            // Initiate payment with checkout data attached
+            const paymentResponse = await axios.post('/api/payments/initiate', {
+                provider: selectedPaymentMethod!.id,
+                amount: paymentAmount,
+                reference: tempReference,
+                email: shippingInfo.email,
+                phone: selectedPaymentMethod!.requires_phone ? ecocashPhone : shippingInfo.phone,
+                description: `Order for ${product.title}${paymentPercentage === 75 ? ' (75% deposit)' : ''}`,
+                product_name: product.title,
+                product_image: product.images?.[0],
+                currency: 'USD',
+                payment_percentage: paymentPercentage,
+                checkout_data: checkoutData, // Include checkout data for payment-first flow
+            });
+
+            if (!paymentResponse.data.success) {
+                throw new Error(paymentResponse.data.message || 'Payment initialization failed');
+            }
+
+            // Handle different payment flows
+            if (paymentResponse.data.requires_redirect && paymentResponse.data.redirect_url) {
+                // Redirect to external payment page (Paynow web, PayPal, Stripe)
+                // Order will be created after payment is confirmed via webhook
+                setToastType('info');
+                setToastMessage('Redirecting to payment page...');
+                window.location.href = paymentResponse.data.redirect_url;
+                return;
+            }
+
+            if (paymentResponse.data.poll_url) {
+                // Mobile payment (EcoCash) - start polling
+                // Order will be created when payment is confirmed
+                setPaymentProcessing(true);
+                setPaymentPollUrl(paymentResponse.data.poll_url);
+                setPaymentMessage(paymentResponse.data.message || 'Please complete payment on your phone...');
+                setLoading(false);
+                
+                // Start polling for payment status - order will be created on success
+                pollPaymentStatus(paymentResponse.data.poll_url, null, selectedPaymentMethod!.title, tempReference);
+                return;
+            }
+
+            // Fallback: should not reach here
+            throw new Error('Unexpected payment response');
+
         } catch (error: any) {
             setToastType('error');
             setToastMessage(error.response?.data?.message || error.message || 'Failed to place order. Please try again.');
         } finally {
-            setLoading(false);
+            if (!paymentProcessing) {
+                setLoading(false);
+            }
         }
+    };
+
+    // Poll for mobile payment status (EcoCash)
+    const pollPaymentStatus = async (pollUrl: string, orderData: any, paymentMethodTitle: string, reference?: string) => {
+        const maxAttempts = 60; // 5 minutes with 5-second intervals
+        let attempts = 0;
+
+        const poll = async () => {
+            if (attempts >= maxAttempts) {
+                setPaymentProcessing(false);
+                setPaymentMessage(null);
+                setToastType('error');
+                setToastMessage('Payment timeout. Please try again or contact support.');
+                return;
+            }
+
+            try {
+                const response = await axios.post('/api/payments/status', {
+                    provider: selectedPaymentMethod?.id,
+                    poll_url: pollUrl,
+                    reference: reference, // Pass reference for order lookup
+                });
+
+                if (response.data.paid) {
+                    // Payment successful!
+                    setPaymentProcessing(false);
+                    setPaymentMessage(null);
+                    setToastType('success');
+                    setToastMessage('Payment received!');
+                    
+                    // Use order data from response if available (payment-first flow)
+                    const finalOrderData = response.data.order ?? orderData;
+                    
+                    setOrderSuccess({
+                        orderId: finalOrderData?.id ?? null,
+                        wooOrderId: finalOrderData?.woocommerce_order_id ?? null,
+                        total: finalOrderData?.total ?? null,
+                        paymentMethod: paymentMethodTitle,
+                        deliveryMethod,
+                        shipping: shippingInfo,
+                        billing: sameAsShipping ? shippingInfo : billingInfo,
+                        quantity: 1,
+                        productTitle: product.title ?? 'Order Item',
+                        productImage: product.images?.[0] ?? '/placeholder.png',
+                    });
+                    return;
+                }
+
+                // Still pending - continue polling
+                attempts++;
+                setTimeout(poll, 5000);
+            } catch (error) {
+                console.error('Error polling payment status:', error);
+                attempts++;
+                setTimeout(poll, 5000);
+            }
+        };
+
+        poll();
     };
 
     if (orderSuccess) {
@@ -329,7 +493,7 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                                 <p className="text-xs text-neutral-500 dark:text-neutral-400">Qty: {orderSuccess.quantity}</p>
                                             </div>
                                             <div className="text-sm font-semibold text-neutral-900 dark:text-white">
-                                                {orderSuccess.total != null ? `AED ${orderSuccess.total}` : 'Paid'}
+                                                {orderSuccess.total != null ? `USD $${orderSuccess.total}` : 'Paid'}
                                             </div>
                                         </div>
                                     </div>
@@ -388,7 +552,7 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                         <div className="flex justify-between mt-2">
                                             <span>Total</span>
                                             <span className="text-neutral-900 dark:text-white">
-                                                {orderSuccess.total != null ? `AED ${orderSuccess.total}` : 'Paid'}
+                                                {orderSuccess.total != null ? `USD $${orderSuccess.total}` : 'Paid'}
                                             </span>
                                         </div>
                                     </div>
@@ -1150,20 +1314,105 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                                             onChange={() => setSelectedPaymentMethod(method)}
                                                             className="w-4 h-4 text-emerald-600 focus:ring-2 focus:ring-[#86efac]"
                                                         />
-                                                        <div>
-                                                            <div className="font-medium text-neutral-900 dark:text-white">
-                                                                {method.title}
+                                                        <div className="flex items-center gap-3 flex-1">
+                                                            {/* Payment method icon */}
+                                                            <div className="w-10 h-10 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center">
+                                                                {method.icon === 'ecocash' && (
+                                                                    <span className="text-lg font-bold text-green-600">EC</span>
+                                                                )}
+                                                                {method.icon === 'paynow' && (
+                                                                    <span className="text-lg font-bold text-blue-600">PN</span>
+                                                                )}
+                                                                {method.icon === 'paypal' && (
+                                                                    <span className="text-lg font-bold text-blue-500">PP</span>
+                                                                )}
+                                                                {method.icon === 'stripe' && (
+                                                                    <span className="text-lg font-bold text-purple-600">S</span>
+                                                                )}
+                                                                {method.icon === 'cash' && (
+                                                                    <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                                    </svg>
+                                                                )}
+                                                                {!method.icon && (
+                                                                    <svg className="w-5 h-5 text-neutral-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                                                    </svg>
+                                                                )}
                                                             </div>
-                                                            {method.description && (
-                                                                <div className="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
-                                                                    {method.description}
+                                                            <div className="flex-1">
+                                                                <div className="font-medium text-neutral-900 dark:text-white flex items-center gap-2">
+                                                                    {method.title}
+                                                                    {method.type === 'mobile_push' && (
+                                                                        <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
+                                                                            Mobile
+                                                                        </span>
+                                                                    )}
                                                                 </div>
-                                                            )}
+                                                                {method.description && (
+                                                                    <div className="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
+                                                                        {method.description}
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     </label>
                                                 ))}
                                             </div>
                                         </div>
+
+                                        {/* EcoCash Phone Number Input */}
+                                        {selectedPaymentMethod?.requires_phone && (
+                                            <div className="p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                                                <label className="block text-sm font-medium text-green-800 dark:text-green-300 mb-2">
+                                                    EcoCash Phone Number
+                                                </label>
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="tel"
+                                                        value={ecocashPhone}
+                                                        onChange={(e) => setEcocashPhone(e.target.value.replace(/[^0-9]/g, ''))}
+                                                        placeholder="077 123 4567"
+                                                        className="flex-1 px-4 py-2.5 rounded-lg border border-green-300 dark:border-green-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                                        maxLength={10}
+                                                    />
+                                                </div>
+                                                <p className="text-xs text-green-600 dark:text-green-400 mt-2">
+                                                    A USSD prompt will be sent to this number to complete payment
+                                                </p>
+                                            </div>
+                                        )}
+
+                                        {/* Payment processing overlay for mobile payments */}
+                                        {paymentProcessing && (
+                                            <div className="p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center">
+                                                        <svg className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-medium text-blue-900 dark:text-blue-100">Waiting for payment...</h4>
+                                                        <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
+                                                            {paymentMessage || 'Please complete payment on your phone'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setPaymentProcessing(false);
+                                                        setPaymentMessage(null);
+                                                        setPaymentPollUrl(null);
+                                                    }}
+                                                    className="mt-4 text-sm text-blue-600 dark:text-blue-400 hover:underline"
+                                                >
+                                                    Cancel and try another method
+                                                </button>
+                                            </div>
+                                        )}
 
                                         {auth?.user && (
                                             <label className="flex items-center gap-2 cursor-pointer">
@@ -1190,13 +1439,14 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                                         setStep('billing');
                                                     }
                                                 }}
-                                                className="px-6 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+                                                disabled={paymentProcessing}
+                                                className="px-6 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors disabled:opacity-50"
                                             >
                                                 Back
                                             </button>
                                             <button
                                                 type="submit"
-                                                disabled={loading}
+                                                disabled={loading || paymentProcessing}
                                                 className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:hover:bg-emerald-400 dark:text-neutral-900 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                                             >
                                                 {loading ? (
@@ -1207,9 +1457,19 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                                         </svg>
                                                         Processing...
                                                     </>
+                                                ) : selectedPaymentMethod?.type === 'cash' ? (
+                                                    <>
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                        </svg>
+                                                        Place Order
+                                                    </>
                                                 ) : (
                                                     <>
-                                                        Place Order
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                        </svg>
+                                                        Proceed to Payment
                                                     </>
                                                 )}
                                             </button>
@@ -1259,12 +1519,9 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                     <div className="flex justify-between">
                                         <span className="text-lg font-semibold text-neutral-900 dark:text-white">Total</span>
                                         <span className="text-lg font-bold text-emerald-600 dark:text-[#86efac]">
-                                            ${totalPrice.toFixed(2)}
+                                            USD ${totalPrice.toFixed(2)}
                                         </span>
                                     </div>
-                                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                                        USD (Delivered to Zimbabwe)
-                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -1278,6 +1535,98 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                 type={toastType} 
                 onDismiss={() => setToastMessage(null)} 
             />
+
+            {/* Payment Percentage Modal */}
+            {showPaymentPercentageModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden">
+                        <div className="p-6 border-b border-neutral-200 dark:border-neutral-800">
+                            <h3 className="text-xl font-semibold text-neutral-900 dark:text-white">
+                                Choose Payment Amount
+                            </h3>
+                            <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-1">
+                                Select how much you'd like to pay now
+                            </p>
+                        </div>
+                        
+                        <div className="p-6 space-y-4">
+                            {/* 100% Option */}
+                            <button
+                                type="button"
+                                onClick={() => setSelectedPaymentPercentage(100)}
+                                className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                                    selectedPaymentPercentage === 100
+                                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600'
+                                }`}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="font-semibold text-neutral-900 dark:text-white">
+                                            Pay in Full (100%)
+                                        </div>
+                                        <div className="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">
+                                            Complete payment now - no balance remaining
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-lg font-bold text-emerald-600 dark:text-[#86efac]">
+                                            ${totalPrice.toFixed(2)}
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+
+                            {/* 75% Option */}
+                            <button
+                                type="button"
+                                onClick={() => setSelectedPaymentPercentage(75)}
+                                className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                                    selectedPaymentPercentage === 75
+                                        ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20'
+                                        : 'border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600'
+                                }`}
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="font-semibold text-neutral-900 dark:text-white">
+                                            Pay Deposit (75%)
+                                        </div>
+                                        <div className="text-sm text-neutral-600 dark:text-neutral-400 mt-0.5">
+                                            Pay ${(totalPrice * 0.25).toFixed(2)} remaining on delivery
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-lg font-bold text-emerald-600 dark:text-[#86efac]">
+                                            ${(totalPrice * 0.75).toFixed(2)}
+                                        </div>
+                                        <div className="text-xs text-neutral-500 dark:text-neutral-500">
+                                            + ${(totalPrice * 0.25).toFixed(2)} later
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div className="p-6 border-t border-neutral-200 dark:border-neutral-800 flex gap-3">
+                            <button
+                                type="button"
+                                onClick={() => setShowPaymentPercentageModal(false)}
+                                className="flex-1 px-4 py-3 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 dark:bg-neutral-800 rounded-lg transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => processOrderWithPayment(selectedPaymentPercentage)}
+                                className="flex-1 px-4 py-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:hover:bg-emerald-400 dark:text-neutral-900 rounded-lg transition-colors"
+                            >
+                                Continue to Payment
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

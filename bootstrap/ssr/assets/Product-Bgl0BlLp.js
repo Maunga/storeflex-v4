@@ -1,11 +1,12 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import { T as Toast } from "./Toast-2CzZTQ7I.js";
 import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import { S as SEO } from "./SEO-_RAcpsXN.js";
 import axios from "axios";
 function Product({ auth, product, identifier, canLogin, canRegister }) {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -68,7 +69,16 @@ function Product({ auth, product, identifier, canLogin, canRegister }) {
   const reviews = product.reviews?.slice(0, 6) ?? [];
   const stars = product.rating_stars_distribution ?? [];
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(Head, { title: product.title ?? "Product" }),
+    /* @__PURE__ */ jsx(
+      SEO,
+      {
+        title: product.title ?? "Product",
+        description: `Buy ${product.title ?? "this product"} - shipped from Dubai to Zimbabwe. ${product.dxb_price ? `Price: $${product.dxb_price}` : ""} Fast delivery, authentic products from Amazon UAE.`,
+        keywords: `${product.title ?? "product"}, buy online Zimbabwe, Dubai shipping, Amazon UAE, ${categories.join(", ")}`,
+        image: product.images?.[0],
+        type: "product"
+      }
+    ),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
       auth?.user && /* @__PURE__ */ jsx(SidebarBookmarks, { user: auth.user, bookmarks, activeAsin: identifier }),
       auth?.user && /* @__PURE__ */ jsx(

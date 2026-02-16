@@ -1,7 +1,8 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import { S as SEO } from "./SEO-_RAcpsXN.js";
 import axios from "axios";
 function Terms({ auth }) {
   const [bookmarks, setBookmarks] = useState([]);
@@ -13,7 +14,14 @@ function Terms({ auth }) {
     }
   }, [auth?.user]);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(Head, { title: "Terms & Conditions" }),
+    /* @__PURE__ */ jsx(
+      SEO,
+      {
+        title: "Terms & Conditions",
+        description: "Read Storeflex terms and conditions for dropshipping services from Dubai to Zimbabwe. Learn about our shipping policies, returns, and customer service guarantees.",
+        keywords: "terms and conditions, shipping policy Zimbabwe, dropshipping terms, Storeflex policies, Dubai to Zimbabwe shipping terms"
+      }
+    ),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
       auth?.user && /* @__PURE__ */ jsx(SidebarBookmarks, { user: auth.user, bookmarks }),
       auth?.user && /* @__PURE__ */ jsx(

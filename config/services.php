@@ -35,4 +35,38 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Payment Providers
+    |--------------------------------------------------------------------------
+    */
+
+    'paynow' => [
+        'integration_id' => env('PAYNOW_INTEGRATION_ID'),
+        'integration_key' => env('PAYNOW_INTEGRATION_KEY'),
+        'return_url' => env('PAYNOW_RETURN_URL'),
+        'result_url' => env('PAYNOW_RESULT_URL'),
+    ],
+
+    'paypal' => [
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'client_secret' => env('PAYPAL_CLIENT_SECRET'),
+        'sandbox' => env('PAYPAL_SANDBOX', true),
+        'return_url' => env('PAYPAL_RETURN_URL'),
+        'cancel_url' => env('PAYPAL_CANCEL_URL'),
+    ],
+
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'return_url' => env('STRIPE_RETURN_URL'),
+        'cancel_url' => env('STRIPE_CANCEL_URL'),
+    ],
+
+    'agentx' => [
+        'domain' => env('AGENTX_DOMAIN'),
+        'master_key' => env('MASTER_KEY'),
+    ],
+
 ];

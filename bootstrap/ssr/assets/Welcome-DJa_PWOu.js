@@ -1,8 +1,9 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useRef, useEffect } from "react";
-import { useRemember, usePage, Head, Link, router } from "@inertiajs/react";
+import { useRemember, usePage, Link, router } from "@inertiajs/react";
 import { T as Toast } from "./Toast-2CzZTQ7I.js";
 import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import { S as SEO } from "./SEO-_RAcpsXN.js";
 import axios from "axios";
 const marketingStatements = [
   { text: "Amazon.ae" },
@@ -83,7 +84,14 @@ function Welcome({ auth, canLogin, canRegister }) {
     }
   };
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(Head, { title: "Your Dropshipping Assistant" }),
+    /* @__PURE__ */ jsx(
+      SEO,
+      {
+        title: "Shop Premium Products from Dubai | Delivered to Zimbabwe",
+        description: "Discover amazing products from Amazon UAE delivered straight to Zimbabwe. Fast, reliable dropshipping with authentic products at competitive prices. Shop electronics, fashion, home goods and more.",
+        keywords: "dropshipping Zimbabwe, Dubai to Zimbabwe shipping, Amazon UAE Zimbabwe, online shopping Zimbabwe, import from Dubai, Storeflex, Zimbabwe online store, UAE products delivery, Dubai shopping Zimbabwe"
+      }
+    ),
     /* @__PURE__ */ jsx(Toast, { message: toastMessage, type: toastType, onDismiss: () => setToastMessage(null) }),
     loading && /* @__PURE__ */ jsx("div", { className: "fixed inset-0 bg-white/60 dark:bg-neutral-950/60 z-50 flex items-center justify-center backdrop-blur-sm", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3 animate-fade-in", children: [
       /* @__PURE__ */ jsx("div", { className: "w-10 h-10 border-4 border-neutral-200 border-t-[#86efac] rounded-full animate-spin" }),

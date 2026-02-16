@@ -1,9 +1,10 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useEffect, useMemo } from "react";
-import { Head, Link, router } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import axios from "axios";
 import NProgress from "nprogress";
 import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import { S as SEO } from "./SEO-_RAcpsXN.js";
 function SearchResults({ auth, results, query, canLogin, canRegister }) {
   const [searchQuery, setSearchQuery] = useState(query);
   const [loading, setLoading] = useState(false);
@@ -78,7 +79,14 @@ function SearchResults({ auth, results, query, canLogin, canRegister }) {
     });
   };
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(Head, { title: `Search: ${query}` }),
+    /* @__PURE__ */ jsx(
+      SEO,
+      {
+        title: `Search: ${query} - Products from Dubai`,
+        description: `Find ${query} products shipped from Dubai to Zimbabwe. Browse ${results.length} results with competitive prices and fast delivery from Amazon UAE.`,
+        keywords: `${query}, buy ${query} Zimbabwe, Dubai shipping, Amazon UAE products, online shopping Zimbabwe`
+      }
+    ),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
       auth?.user && /* @__PURE__ */ jsx(SidebarBookmarks, { user: auth.user, bookmarks }),
       auth?.user && /* @__PURE__ */ jsx(

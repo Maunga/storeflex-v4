@@ -1,5 +1,5 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
-import { useState, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Head, Link } from "@inertiajs/react";
 import { T as Toast } from "./Toast-2CzZTQ7I.js";
 import axios from "axios";
@@ -12,6 +12,10 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
   const [toastType, setToastType] = useState("info");
   const [orderSuccess, setOrderSuccess] = useState(null);
   const [deliveryMethod, setDeliveryMethod] = useState("pickup");
+  const [shippingSpeed, setShippingSpeed] = useState("regular");
+  const basePrice = parseFloat(String(product.dxb_price ?? product.price ?? 0)) || 0;
+  const shippingFee = shippingSpeed === "express" ? 5 : 0;
+  const totalPrice = basePrice + shippingFee;
   const [shippingInfo, setShippingInfo] = useState({
     first_name: savedCheckoutData.shipping?.first_name || "",
     last_name: savedCheckoutData.shipping?.last_name || "",
@@ -47,19 +51,65 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
   );
   const [useExpressCheckout, setUseExpressCheckout] = useState(hasSavedDetails);
   const [showSavedDetailsCard, setShowSavedDetailsCard] = useState(hasSavedDetails);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentPollUrl, setPaymentPollUrl] = useState(null);
+  const [paymentMessage, setPaymentMessage] = useState(null);
+  const [pendingOrderReference, setPendingOrderReference] = useState(null);
+  const [showPaymentPercentageModal, setShowPaymentPercentageModal] = useState(false);
+  const [selectedPaymentPercentage, setSelectedPaymentPercentage] = useState(100);
+  const [ecocashPhone, setEcocashPhone] = useState("");
+  const prevShippingContactRef = useRef({
+    first_name: shippingInfo.first_name,
+    last_name: shippingInfo.last_name,
+    email: shippingInfo.email,
+    phone: shippingInfo.phone
+  });
   useEffect(() => {
     loadAgentsAndPaymentMethods();
   }, []);
   useEffect(() => {
-    if (sameAsShipping) {
-      setBillingInfo(shippingInfo);
+    const prevContact = prevShippingContactRef.current;
+    setBillingInfo((prev) => {
+      const updates = {};
+      if (prev.first_name === prevContact.first_name) {
+        updates.first_name = shippingInfo.first_name;
+      }
+      if (prev.last_name === prevContact.last_name) {
+        updates.last_name = shippingInfo.last_name;
+      }
+      if (prev.email === prevContact.email) {
+        updates.email = shippingInfo.email;
+      }
+      if (prev.phone === prevContact.phone) {
+        updates.phone = shippingInfo.phone;
+      }
+      if (Object.keys(updates).length === 0) {
+        return prev;
+      }
+      return { ...prev, ...updates };
+    });
+    prevShippingContactRef.current = {
+      first_name: shippingInfo.first_name,
+      last_name: shippingInfo.last_name,
+      email: shippingInfo.email,
+      phone: shippingInfo.phone
+    };
+  }, [shippingInfo.first_name, shippingInfo.last_name, shippingInfo.email, shippingInfo.phone]);
+  useEffect(() => {
+    if (deliveryMethod === "pickup" && sameAsShipping) {
+      setSameAsShipping(false);
     }
-  }, [sameAsShipping, shippingInfo]);
+  }, [deliveryMethod, sameAsShipping]);
+  useEffect(() => {
+    if (!ecocashPhone && shippingInfo.phone && shippingInfo.phone.length > 3) {
+      setEcocashPhone("");
+    }
+  }, [shippingInfo.phone]);
   async function loadAgentsAndPaymentMethods() {
     try {
       const [agentsResponse, paymentMethodsResponse] = await Promise.all([
         axios.get("/api/checkout/agents"),
-        axios.get("/api/checkout/payment-methods")
+        axios.get("/api/payments/methods")
       ]);
       const agentsData = agentsResponse.data;
       const paymentMethodsData = paymentMethodsResponse.data;
@@ -88,7 +138,23 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
       setToastMessage("Please select an agent and payment method");
       return;
     }
+    if (selectedPaymentMethod.requires_phone && !ecocashPhone) {
+      setToastType("error");
+      setToastMessage("Please enter your EcoCash phone number");
+      return;
+    }
+    if (selectedPaymentMethod.type === "cash") {
+      await processOrderWithPayment(100);
+      return;
+    }
+    setShowPaymentPercentageModal(true);
+  };
+  const processOrderWithPayment = async (paymentPercentage) => {
+    setShowPaymentPercentageModal(false);
     setLoading(true);
+    setPaymentProcessing(false);
+    setPaymentMessage(null);
+    const paymentAmount = paymentPercentage === 100 ? totalPrice : totalPrice * 0.75;
     try {
       const checkoutData = {
         asin: identifier,
@@ -104,7 +170,13 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
           agent: {
             ID: selectedAgent.ID,
             display_name: selectedAgent.display_name
-          }
+          },
+          shipping_speed: {
+            id: shippingSpeed,
+            title: shippingSpeed === "express" ? "Express" : "Regular",
+            fee: shippingFee
+          },
+          payment_percentage: paymentPercentage
         }
       };
       if (auth?.user && saveProfile) {
@@ -117,10 +189,11 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
           console.error("Failed to save profile:", error);
         }
       }
-      const response = await axios.post("/api/checkout/process", checkoutData);
-      if (response.data.success) {
-        setToastType("success");
-        setToastMessage("Order placed successfully!");
+      if (selectedPaymentMethod.type === "cash") {
+        const response = await axios.post("/api/checkout/process", checkoutData);
+        if (!response.data.success) {
+          throw new Error(response.data.message || "Order failed");
+        }
         const orderData = response.data.data?.order ?? null;
         setOrderSuccess({
           orderId: orderData?.id ?? null,
@@ -134,15 +207,99 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
           productTitle: product.title ?? "Order Item",
           productImage: product.images?.[0] ?? "/placeholder.png"
         });
-      } else {
-        throw new Error(response.data.message || "Order failed");
+        setLoading(false);
+        return;
       }
+      const tempReference = `SF-${Date.now()}`;
+      setPendingOrderReference(tempReference);
+      const paymentResponse = await axios.post("/api/payments/initiate", {
+        provider: selectedPaymentMethod.id,
+        amount: paymentAmount,
+        reference: tempReference,
+        email: shippingInfo.email,
+        phone: selectedPaymentMethod.requires_phone ? ecocashPhone : shippingInfo.phone,
+        description: `Order for ${product.title}${paymentPercentage === 75 ? " (75% deposit)" : ""}`,
+        product_name: product.title,
+        product_image: product.images?.[0],
+        currency: "USD",
+        payment_percentage: paymentPercentage,
+        checkout_data: checkoutData
+        // Include checkout data for payment-first flow
+      });
+      if (!paymentResponse.data.success) {
+        throw new Error(paymentResponse.data.message || "Payment initialization failed");
+      }
+      if (paymentResponse.data.requires_redirect && paymentResponse.data.redirect_url) {
+        setToastType("info");
+        setToastMessage("Redirecting to payment page...");
+        window.location.href = paymentResponse.data.redirect_url;
+        return;
+      }
+      if (paymentResponse.data.poll_url) {
+        setPaymentProcessing(true);
+        setPaymentPollUrl(paymentResponse.data.poll_url);
+        setPaymentMessage(paymentResponse.data.message || "Please complete payment on your phone...");
+        setLoading(false);
+        pollPaymentStatus(paymentResponse.data.poll_url, null, selectedPaymentMethod.title, tempReference);
+        return;
+      }
+      throw new Error("Unexpected payment response");
     } catch (error) {
       setToastType("error");
       setToastMessage(error.response?.data?.message || error.message || "Failed to place order. Please try again.");
     } finally {
-      setLoading(false);
+      if (!paymentProcessing) {
+        setLoading(false);
+      }
     }
+  };
+  const pollPaymentStatus = async (pollUrl, orderData, paymentMethodTitle, reference) => {
+    const maxAttempts = 60;
+    let attempts = 0;
+    const poll = async () => {
+      if (attempts >= maxAttempts) {
+        setPaymentProcessing(false);
+        setPaymentMessage(null);
+        setToastType("error");
+        setToastMessage("Payment timeout. Please try again or contact support.");
+        return;
+      }
+      try {
+        const response = await axios.post("/api/payments/status", {
+          provider: selectedPaymentMethod?.id,
+          poll_url: pollUrl,
+          reference
+          // Pass reference for order lookup
+        });
+        if (response.data.paid) {
+          setPaymentProcessing(false);
+          setPaymentMessage(null);
+          setToastType("success");
+          setToastMessage("Payment received!");
+          const finalOrderData = response.data.order ?? orderData;
+          setOrderSuccess({
+            orderId: finalOrderData?.id ?? null,
+            wooOrderId: finalOrderData?.woocommerce_order_id ?? null,
+            total: finalOrderData?.total ?? null,
+            paymentMethod: paymentMethodTitle,
+            deliveryMethod,
+            shipping: shippingInfo,
+            billing: sameAsShipping ? shippingInfo : billingInfo,
+            quantity: 1,
+            productTitle: product.title ?? "Order Item",
+            productImage: product.images?.[0] ?? "/placeholder.png"
+          });
+          return;
+        }
+        attempts++;
+        setTimeout(poll, 5e3);
+      } catch (error) {
+        console.error("Error polling payment status:", error);
+        attempts++;
+        setTimeout(poll, 5e3);
+      }
+    };
+    poll();
   };
   if (orderSuccess) {
     return /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -192,7 +349,7 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
                       orderSuccess.quantity
                     ] })
                   ] }),
-                  /* @__PURE__ */ jsx("div", { className: "text-sm font-semibold text-neutral-900 dark:text-white", children: orderSuccess.total != null ? `AED ${orderSuccess.total}` : "Paid" })
+                  /* @__PURE__ */ jsx("div", { className: "text-sm font-semibold text-neutral-900 dark:text-white", children: orderSuccess.total != null ? `USD $${orderSuccess.total}` : "Paid" })
                 ] })
               ] }),
               /* @__PURE__ */ jsxs("div", { className: "rounded-xl border border-neutral-200 dark:border-neutral-800 p-4 grid grid-cols-1 sm:grid-cols-2 gap-4", children: [
@@ -241,7 +398,7 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
                 ] }),
                 /* @__PURE__ */ jsxs("div", { className: "flex justify-between mt-2", children: [
                   /* @__PURE__ */ jsx("span", { children: "Total" }),
-                  /* @__PURE__ */ jsx("span", { className: "text-neutral-900 dark:text-white", children: orderSuccess.total != null ? `AED ${orderSuccess.total}` : "Paid" })
+                  /* @__PURE__ */ jsx("span", { className: "text-neutral-900 dark:text-white", children: orderSuccess.total != null ? `USD $${orderSuccess.total}` : "Paid" })
                 ] })
               ] }),
               /* @__PURE__ */ jsxs("div", { className: "pt-3 border-t border-neutral-200 dark:border-neutral-800 flex flex-col gap-2", children: [
@@ -451,6 +608,57 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
                   )
                 ] })
               ] }),
+              /* @__PURE__ */ jsxs("div", { className: "mb-6", children: [
+                /* @__PURE__ */ jsx("label", { className: "block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3", children: "Shipping Speed" }),
+                /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-2 gap-3", children: [
+                  /* @__PURE__ */ jsxs(
+                    "label",
+                    {
+                      className: `flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${shippingSpeed === "regular" ? "border-[#86efac] bg-[#86efac]/10" : "border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600"}`,
+                      children: [
+                        /* @__PURE__ */ jsx(
+                          "input",
+                          {
+                            type: "radio",
+                            name: "shippingSpeed",
+                            value: "regular",
+                            checked: shippingSpeed === "regular",
+                            onChange: () => setShippingSpeed("regular"),
+                            className: "w-4 h-4 text-emerald-600 focus:ring-2 focus:ring-[#86efac]"
+                          }
+                        ),
+                        /* @__PURE__ */ jsxs("div", { children: [
+                          /* @__PURE__ */ jsx("div", { className: "font-medium text-neutral-900 dark:text-white", children: "Regular" }),
+                          /* @__PURE__ */ jsx("div", { className: "text-xs text-neutral-500 dark:text-neutral-400", children: "Free" })
+                        ] })
+                      ]
+                    }
+                  ),
+                  /* @__PURE__ */ jsxs(
+                    "label",
+                    {
+                      className: `flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${shippingSpeed === "express" ? "border-[#86efac] bg-[#86efac]/10" : "border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600"}`,
+                      children: [
+                        /* @__PURE__ */ jsx(
+                          "input",
+                          {
+                            type: "radio",
+                            name: "shippingSpeed",
+                            value: "express",
+                            checked: shippingSpeed === "express",
+                            onChange: () => setShippingSpeed("express"),
+                            className: "w-4 h-4 text-emerald-600 focus:ring-2 focus:ring-[#86efac]"
+                          }
+                        ),
+                        /* @__PURE__ */ jsxs("div", { children: [
+                          /* @__PURE__ */ jsx("div", { className: "font-medium text-neutral-900 dark:text-white", children: "Express" }),
+                          /* @__PURE__ */ jsx("div", { className: "text-xs text-neutral-500 dark:text-neutral-400", children: "$5 extra" })
+                        ] })
+                      ]
+                    }
+                  )
+                ] })
+              ] }),
               /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
                 /* @__PURE__ */ jsxs("div", { children: [
                   /* @__PURE__ */ jsx("label", { className: "block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1", children: "First Name" }),
@@ -502,6 +710,33 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
                     value: shippingInfo.phone,
                     onChange: (e) => setShippingInfo({ ...shippingInfo, phone: e.target.value }),
                     className: "w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-[#86efac] focus:border-transparent"
+                  }
+                )
+              ] }),
+              deliveryMethod === "pickup" && /* @__PURE__ */ jsxs("div", { children: [
+                /* @__PURE__ */ jsx("label", { className: "block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1", children: "City" }),
+                /* @__PURE__ */ jsxs(
+                  "select",
+                  {
+                    required: true,
+                    value: shippingInfo.city,
+                    onChange: (e) => setShippingInfo({ ...shippingInfo, city: e.target.value }),
+                    className: "w-full px-4 py-2.5 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-[#86efac] focus:border-transparent",
+                    children: [
+                      /* @__PURE__ */ jsx("option", { value: "", disabled: true, children: "Select a city" }),
+                      /* @__PURE__ */ jsx("option", { value: "Harare", children: "Harare" }),
+                      /* @__PURE__ */ jsx("option", { value: "Bulawayo", children: "Bulawayo" }),
+                      /* @__PURE__ */ jsx("option", { value: "Chitungwiza", children: "Chitungwiza" }),
+                      /* @__PURE__ */ jsx("option", { value: "Mutare", children: "Mutare" }),
+                      /* @__PURE__ */ jsx("option", { value: "Gweru", children: "Gweru" }),
+                      /* @__PURE__ */ jsx("option", { value: "Kwekwe", children: "Kwekwe" }),
+                      /* @__PURE__ */ jsx("option", { value: "Kadoma", children: "Kadoma" }),
+                      /* @__PURE__ */ jsx("option", { value: "Masvingo", children: "Masvingo" }),
+                      /* @__PURE__ */ jsx("option", { value: "Victoria Falls", children: "Victoria Falls" }),
+                      /* @__PURE__ */ jsx("option", { value: "Hwange", children: "Hwange" }),
+                      /* @__PURE__ */ jsx("option", { value: "Marondera", children: "Marondera" }),
+                      /* @__PURE__ */ jsx("option", { value: "Chinhoyi", children: "Chinhoyi" })
+                    ]
                   }
                 )
               ] }),
@@ -610,7 +845,7 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
           ] }),
           step === "billing" && /* @__PURE__ */ jsxs("form", { onSubmit: handleBillingSubmit, className: "space-y-4", children: [
             /* @__PURE__ */ jsx("h3", { className: "text-lg font-semibold text-neutral-900 dark:text-white mb-4", children: "Billing Information" }),
-            /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 cursor-pointer", children: [
+            deliveryMethod === "delivery" && /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 cursor-pointer", children: [
               /* @__PURE__ */ jsx(
                 "input",
                 {
@@ -622,7 +857,7 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
               ),
               /* @__PURE__ */ jsx("span", { className: "text-sm text-neutral-700 dark:text-neutral-300", children: "Same as shipping address" })
             ] }),
-            !sameAsShipping && /* @__PURE__ */ jsxs("div", { className: "space-y-4 mt-4", children: [
+            (deliveryMethod === "pickup" || !sameAsShipping) && /* @__PURE__ */ jsxs("div", { className: "space-y-4 mt-4", children: [
               /* @__PURE__ */ jsxs("div", { className: "grid grid-cols-2 gap-4", children: [
                 /* @__PURE__ */ jsxs("div", { children: [
                   /* @__PURE__ */ jsx("label", { className: "block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1", children: "First Name" }),
@@ -852,14 +1087,67 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
                         className: "w-4 h-4 text-emerald-600 focus:ring-2 focus:ring-[#86efac]"
                       }
                     ),
-                    /* @__PURE__ */ jsxs("div", { children: [
-                      /* @__PURE__ */ jsx("div", { className: "font-medium text-neutral-900 dark:text-white", children: method.title }),
-                      method.description && /* @__PURE__ */ jsx("div", { className: "text-sm text-neutral-500 dark:text-neutral-400 mt-0.5", children: method.description })
+                    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 flex-1", children: [
+                      /* @__PURE__ */ jsxs("div", { className: "w-10 h-10 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center", children: [
+                        method.icon === "ecocash" && /* @__PURE__ */ jsx("span", { className: "text-lg font-bold text-green-600", children: "EC" }),
+                        method.icon === "paynow" && /* @__PURE__ */ jsx("span", { className: "text-lg font-bold text-blue-600", children: "PN" }),
+                        method.icon === "paypal" && /* @__PURE__ */ jsx("span", { className: "text-lg font-bold text-blue-500", children: "PP" }),
+                        method.icon === "stripe" && /* @__PURE__ */ jsx("span", { className: "text-lg font-bold text-purple-600", children: "S" }),
+                        method.icon === "cash" && /* @__PURE__ */ jsx("svg", { className: "w-5 h-5 text-green-600", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" }) }),
+                        !method.icon && /* @__PURE__ */ jsx("svg", { className: "w-5 h-5 text-neutral-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" }) })
+                      ] }),
+                      /* @__PURE__ */ jsxs("div", { className: "flex-1", children: [
+                        /* @__PURE__ */ jsxs("div", { className: "font-medium text-neutral-900 dark:text-white flex items-center gap-2", children: [
+                          method.title,
+                          method.type === "mobile_push" && /* @__PURE__ */ jsx("span", { className: "text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400", children: "Mobile" })
+                        ] }),
+                        method.description && /* @__PURE__ */ jsx("div", { className: "text-sm text-neutral-500 dark:text-neutral-400 mt-0.5", children: method.description })
+                      ] })
                     ] })
                   ]
                 },
                 method.id
               )) })
+            ] }),
+            selectedPaymentMethod?.requires_phone && /* @__PURE__ */ jsxs("div", { className: "p-4 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800", children: [
+              /* @__PURE__ */ jsx("label", { className: "block text-sm font-medium text-green-800 dark:text-green-300 mb-2", children: "EcoCash Phone Number" }),
+              /* @__PURE__ */ jsx("div", { className: "flex items-center gap-2", children: /* @__PURE__ */ jsx(
+                "input",
+                {
+                  type: "tel",
+                  value: ecocashPhone,
+                  onChange: (e) => setEcocashPhone(e.target.value.replace(/[^0-9]/g, "")),
+                  placeholder: "077 123 4567",
+                  className: "flex-1 px-4 py-2.5 rounded-lg border border-green-300 dark:border-green-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent",
+                  maxLength: 10
+                }
+              ) }),
+              /* @__PURE__ */ jsx("p", { className: "text-xs text-green-600 dark:text-green-400 mt-2", children: "A USSD prompt will be sent to this number to complete payment" })
+            ] }),
+            paymentProcessing && /* @__PURE__ */ jsxs("div", { className: "p-6 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800", children: [
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
+                /* @__PURE__ */ jsx("div", { className: "w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center", children: /* @__PURE__ */ jsxs("svg", { className: "w-6 h-6 text-blue-600 dark:text-blue-400 animate-spin", fill: "none", viewBox: "0 0 24 24", children: [
+                  /* @__PURE__ */ jsx("circle", { className: "opacity-25", cx: "12", cy: "12", r: "10", stroke: "currentColor", strokeWidth: "4" }),
+                  /* @__PURE__ */ jsx("path", { className: "opacity-75", fill: "currentColor", d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" })
+                ] }) }),
+                /* @__PURE__ */ jsxs("div", { children: [
+                  /* @__PURE__ */ jsx("h4", { className: "font-medium text-blue-900 dark:text-blue-100", children: "Waiting for payment..." }),
+                  /* @__PURE__ */ jsx("p", { className: "text-sm text-blue-700 dark:text-blue-300 mt-1", children: paymentMessage || "Please complete payment on your phone" })
+                ] })
+              ] }),
+              /* @__PURE__ */ jsx(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => {
+                    setPaymentProcessing(false);
+                    setPaymentMessage(null);
+                    setPaymentPollUrl(null);
+                  },
+                  className: "mt-4 text-sm text-blue-600 dark:text-blue-400 hover:underline",
+                  children: "Cancel and try another method"
+                }
+              )
             ] }),
             auth?.user && /* @__PURE__ */ jsxs("label", { className: "flex items-center gap-2 cursor-pointer", children: [
               /* @__PURE__ */ jsx(
@@ -886,7 +1174,8 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
                       setStep("billing");
                     }
                   },
-                  className: "px-6 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors",
+                  disabled: paymentProcessing,
+                  className: "px-6 py-2.5 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors disabled:opacity-50",
                   children: "Back"
                 }
               ),
@@ -894,7 +1183,7 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
                 "button",
                 {
                   type: "submit",
-                  disabled: loading,
+                  disabled: loading || paymentProcessing,
                   className: "px-6 py-3 bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:hover:bg-emerald-400 dark:text-neutral-900 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2",
                   children: loading ? /* @__PURE__ */ jsxs(Fragment, { children: [
                     /* @__PURE__ */ jsxs("svg", { className: "w-5 h-5 animate-spin", viewBox: "0 0 24 24", fill: "none", children: [
@@ -902,7 +1191,13 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
                       /* @__PURE__ */ jsx("path", { className: "opacity-75", fill: "currentColor", d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" })
                     ] }),
                     "Processing..."
-                  ] }) : /* @__PURE__ */ jsx(Fragment, { children: "Place Order" })
+                  ] }) : selectedPaymentMethod?.type === "cash" ? /* @__PURE__ */ jsxs(Fragment, { children: [
+                    /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M5 13l4 4L19 7" }) }),
+                    "Place Order"
+                  ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+                    /* @__PURE__ */ jsx("svg", { className: "w-5 h-5", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" }) }),
+                    "Proceed to Payment"
+                  ] })
                 }
               )
             ] })
@@ -929,24 +1224,21 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
               /* @__PURE__ */ jsx("span", { className: "text-neutral-600 dark:text-neutral-400", children: "Subtotal" }),
               /* @__PURE__ */ jsxs("span", { className: "text-neutral-900 dark:text-white font-medium", children: [
                 "$",
-                product.dxb_price || product.price || "0"
+                basePrice.toFixed(2)
               ] })
             ] }),
             /* @__PURE__ */ jsxs("div", { className: "flex justify-between text-sm", children: [
               /* @__PURE__ */ jsx("span", { className: "text-neutral-600 dark:text-neutral-400", children: "Shipping" }),
-              /* @__PURE__ */ jsx("span", { className: "text-neutral-900 dark:text-white font-medium", children: "Included" })
+              /* @__PURE__ */ jsx("span", { className: "text-neutral-900 dark:text-white font-medium", children: shippingFee > 0 ? `$${shippingFee.toFixed(2)}` : "Free" })
             ] })
           ] }),
-          /* @__PURE__ */ jsxs("div", { className: "pt-4 border-t border-neutral-200 dark:border-neutral-800", children: [
-            /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
-              /* @__PURE__ */ jsx("span", { className: "text-lg font-semibold text-neutral-900 dark:text-white", children: "Total" }),
-              /* @__PURE__ */ jsxs("span", { className: "text-lg font-bold text-emerald-600 dark:text-[#86efac]", children: [
-                "$",
-                product.dxb_price || product.price || "0"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsx("p", { className: "text-xs text-neutral-500 dark:text-neutral-400 mt-1", children: "USD (Delivered to Zimbabwe)" })
-          ] })
+          /* @__PURE__ */ jsx("div", { className: "pt-4 border-t border-neutral-200 dark:border-neutral-800", children: /* @__PURE__ */ jsxs("div", { className: "flex justify-between", children: [
+            /* @__PURE__ */ jsx("span", { className: "text-lg font-semibold text-neutral-900 dark:text-white", children: "Total" }),
+            /* @__PURE__ */ jsxs("span", { className: "text-lg font-bold text-emerald-600 dark:text-[#86efac]", children: [
+              "USD $",
+              totalPrice.toFixed(2)
+            ] })
+          ] }) })
         ] }) })
       ] }) })
     ] }),
@@ -957,7 +1249,82 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
         type: toastType,
         onDismiss: () => setToastMessage(null)
       }
-    )
+    ),
+    showPaymentPercentageModal && /* @__PURE__ */ jsx("div", { className: "fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm", children: /* @__PURE__ */ jsxs("div", { className: "bg-white dark:bg-neutral-900 rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden", children: [
+      /* @__PURE__ */ jsxs("div", { className: "p-6 border-b border-neutral-200 dark:border-neutral-800", children: [
+        /* @__PURE__ */ jsx("h3", { className: "text-xl font-semibold text-neutral-900 dark:text-white", children: "Choose Payment Amount" }),
+        /* @__PURE__ */ jsx("p", { className: "text-sm text-neutral-600 dark:text-neutral-400 mt-1", children: "Select how much you'd like to pay now" })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "p-6 space-y-4", children: [
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setSelectedPaymentPercentage(100),
+            className: `w-full p-4 rounded-xl border-2 text-left transition-all ${selectedPaymentPercentage === 100 ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20" : "border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600"}`,
+            children: /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ jsxs("div", { children: [
+                /* @__PURE__ */ jsx("div", { className: "font-semibold text-neutral-900 dark:text-white", children: "Pay in Full (100%)" }),
+                /* @__PURE__ */ jsx("div", { className: "text-sm text-neutral-600 dark:text-neutral-400 mt-0.5", children: "Complete payment now - no balance remaining" })
+              ] }),
+              /* @__PURE__ */ jsx("div", { className: "text-right", children: /* @__PURE__ */ jsxs("div", { className: "text-lg font-bold text-emerald-600 dark:text-[#86efac]", children: [
+                "$",
+                totalPrice.toFixed(2)
+              ] }) })
+            ] })
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setSelectedPaymentPercentage(75),
+            className: `w-full p-4 rounded-xl border-2 text-left transition-all ${selectedPaymentPercentage === 75 ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20" : "border-neutral-200 dark:border-neutral-700 hover:border-neutral-300 dark:hover:border-neutral-600"}`,
+            children: /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ jsxs("div", { children: [
+                /* @__PURE__ */ jsx("div", { className: "font-semibold text-neutral-900 dark:text-white", children: "Pay Deposit (75%)" }),
+                /* @__PURE__ */ jsxs("div", { className: "text-sm text-neutral-600 dark:text-neutral-400 mt-0.5", children: [
+                  "Pay $",
+                  (totalPrice * 0.25).toFixed(2),
+                  " remaining on delivery"
+                ] })
+              ] }),
+              /* @__PURE__ */ jsxs("div", { className: "text-right", children: [
+                /* @__PURE__ */ jsxs("div", { className: "text-lg font-bold text-emerald-600 dark:text-[#86efac]", children: [
+                  "$",
+                  (totalPrice * 0.75).toFixed(2)
+                ] }),
+                /* @__PURE__ */ jsxs("div", { className: "text-xs text-neutral-500 dark:text-neutral-500", children: [
+                  "+ $",
+                  (totalPrice * 0.25).toFixed(2),
+                  " later"
+                ] })
+              ] })
+            ] })
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "p-6 border-t border-neutral-200 dark:border-neutral-800 flex gap-3", children: [
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setShowPaymentPercentageModal(false),
+            className: "flex-1 px-4 py-3 text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white bg-neutral-100 dark:bg-neutral-800 rounded-lg transition-colors",
+            children: "Cancel"
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => processOrderWithPayment(selectedPaymentPercentage),
+            className: "flex-1 px-4 py-3 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:hover:bg-emerald-400 dark:text-neutral-900 rounded-lg transition-colors",
+            children: "Continue to Payment"
+          }
+        )
+      ] })
+    ] }) })
   ] });
 }
 export {

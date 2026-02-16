@@ -451,17 +451,19 @@ export default function Product({ auth, product, identifier, canLogin, canRegist
                                     </div>
 
                                     {/* Buy Button */}
-                                    <Link
-                                        href={`/checkout/${identifier}`}
-                                        className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:text-neutral-900 dark:hover:bg-emerald-400 rounded-lg transition-colors shadow-sm"
-                                    >
-                                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <circle cx="9" cy="21" r="1" />
-                                            <circle cx="20" cy="21" r="1" />
-                                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                                        </svg>
-                                        Buy Now
-                                    </Link>
+                                    {product.price != null && product.price > 0 && product.stock !== 'Currently unavailable' && !product.stock?.toLowerCase().startsWith('temporarily out of stock') && (
+                                        <Link
+                                            href={`/checkout/${identifier}`}
+                                            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:text-neutral-900 dark:hover:bg-emerald-400 rounded-lg transition-colors shadow-sm"
+                                        >
+                                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                <circle cx="9" cy="21" r="1" />
+                                                <circle cx="20" cy="21" r="1" />
+                                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                                            </svg>
+                                            Buy Now
+                                        </Link>
+                                    )}
 
 
                                 </div>

@@ -19,6 +19,8 @@ return new class extends Migration
             $table->integer('balance');
             $table->enum('status', ['PENDING', 'PROCESSING', 'CANCELLED', 'PARTLY_PAID', 'COMPLETED', 'REFUNDED', 'FAILED'])->default('PENDING');
             $table->string('payment_method');
+            $table->integer('amount_paid')->default(0);
+            $table->boolean('pushed')->default(false);
             $table->timestamps();
         });
     }

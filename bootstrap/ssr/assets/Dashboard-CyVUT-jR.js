@@ -1,6 +1,7 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
-import { Head, Link } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
+import { S as SEO } from "./SEO-_RAcpsXN.js";
 import axios from "axios";
 const getGreeting = () => {
   const hour = (/* @__PURE__ */ new Date()).getHours();
@@ -19,7 +20,14 @@ function Dashboard({ auth }) {
     }
   }, [auth?.user]);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
-    /* @__PURE__ */ jsx(Head, { title: "Dashboard" }),
+    /* @__PURE__ */ jsx(
+      SEO,
+      {
+        title: "Dashboard",
+        description: "Manage your Storeflex account. Track orders, view bookmarks, and shop premium products from Dubai delivered to Zimbabwe.",
+        keywords: "dashboard, account, orders, bookmarks, Storeflex Zimbabwe"
+      }
+    ),
     /* @__PURE__ */ jsxs("div", { className: "flex min-h-screen w-full bg-neutral-50 dark:bg-neutral-950", children: [
       /* @__PURE__ */ jsxs("aside", { className: "hidden lg:flex w-[260px] flex-col p-4 bg-white dark:bg-neutral-900 border-r border-neutral-200 dark:border-neutral-800", children: [
         /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between pb-4 mb-4 border-b border-neutral-200 dark:border-neutral-800", children: [
