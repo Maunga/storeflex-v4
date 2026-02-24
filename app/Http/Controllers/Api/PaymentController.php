@@ -40,30 +40,22 @@ class PaymentController extends Controller
                 'type' => 'mobile_push',
                 'requires_phone' => true,
             ],
-            // [
-            //     'id' => PaymentProvider::PAYNOW->value,
-            //     'title' => PaymentProvider::PAYNOW->label(),
-            //     'description' => PaymentProvider::PAYNOW->description(),
-            //     'icon' => PaymentProvider::PAYNOW->icon(),
-            //     'type' => 'redirect',
-            //     'requires_phone' => false,
-            // ],
-            // [
-            //     'id' => PaymentProvider::PAYPAL->value,
-            //     'title' => PaymentProvider::PAYPAL->label(),
-            //     'description' => PaymentProvider::PAYPAL->description(),
-            //     'icon' => PaymentProvider::PAYPAL->icon(),
-            //     'type' => 'redirect',
-            //     'requires_phone' => false,
-            // ],
-            // [
-            //     'id' => PaymentProvider::STRIPE->value,
-            //     'title' => PaymentProvider::STRIPE->label(),
-            //     'description' => PaymentProvider::STRIPE->description(),
-            //     'icon' => PaymentProvider::STRIPE->icon(),
-            //     'type' => 'redirect',
-            //     'requires_phone' => false,
-            // ],
+            [
+                'id' => PaymentProvider::PAYPAL->value,
+                'title' => PaymentProvider::PAYPAL->label(),
+                'description' => PaymentProvider::PAYPAL->description(),
+                'icon' => PaymentProvider::PAYPAL->icon(),
+                'type' => 'redirect',
+                'requires_phone' => false,
+            ],
+            [
+                'id' => PaymentProvider::STRIPE->value,
+                'title' => PaymentProvider::STRIPE->label(),
+                'description' => PaymentProvider::STRIPE->description(),
+                'icon' => PaymentProvider::STRIPE->icon(),
+                'type' => 'redirect',
+                'requires_phone' => false,
+            ],
         ];
 
         return response()->json($methods);

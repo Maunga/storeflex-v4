@@ -56,7 +56,13 @@ class CheckoutController extends Controller
             $responseBody = $response->getBody()->getContents();
             $agents = json_decode($responseBody, true);
 
-            return response()->json($agents ?: []);
+            // Temporarily exclude specific agents
+            $excluded = ['Purply Bot'];
+            $agents = array_values(array_filter($agents ?: [], function ($agent) use ($excluded) {
+                return !in_array($agent['display_name'] ?? '', $excluded);
+            }));
+
+            return response()->json($agents);
         } catch (GuzzleException $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

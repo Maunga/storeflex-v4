@@ -1324,10 +1324,16 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
                                                                     <span className="text-lg font-bold text-blue-600">PN</span>
                                                                 )}
                                                                 {method.icon === 'paypal' && (
-                                                                    <span className="text-lg font-bold text-blue-500">PP</span>
+                                                                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+                                                                        <path d="M19.5 8.5c0 4-3.5 7-8 7h-1l-1 4H6l-.5 1H2l3-14h6c3.5 0 8.5 0 8.5 3z" stroke="#003087" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                        <path d="M17 6c0 4-3 6.5-7.5 6.5" stroke="#009cde" strokeWidth="1.5" strokeLinecap="round"/>
+                                                                    </svg>
                                                                 )}
                                                                 {method.icon === 'stripe' && (
-                                                                    <span className="text-lg font-bold text-purple-600">S</span>
+                                                                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none">
+                                                                        <rect x="2" y="5" width="20" height="14" rx="3" stroke="#635bff" strokeWidth="1.5"/>
+                                                                        <path d="M8 12.5c0-2 1.5-3 3-3 1 0 1.8.5 1.8 1.3 0 2-4.8 1.2-4.8 3.7 0 1 .8 1.5 2 1.5 1 0 2-.5 2.5-1" stroke="#635bff" strokeWidth="1.5" strokeLinecap="round"/>
+                                                                    </svg>
                                                                 )}
                                                                 {method.icon === 'cash' && (
                                                                     <svg className="w-5 h-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">

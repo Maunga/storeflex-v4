@@ -58,7 +58,7 @@ class StripeService implements PaymentGatewayInterface
     {
         try {
             $reference = $orderData['reference'] ?? 'ORDER-' . time();
-            $rawAmount = app()->environment('production') ? $orderData['amount'] : 0.03;
+            $rawAmount = app()->environment('production') ? $orderData['amount'] : 1.00;
             $amount = (int) round($rawAmount * 100); // Stripe uses cents
             $currency = strtolower($orderData['currency'] ?? 'usd');
             $description = $orderData['description'] ?? 'Storeflex Order';

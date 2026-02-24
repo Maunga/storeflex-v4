@@ -24,7 +24,7 @@ enum PaymentProvider: string
     public function description(): string
     {
         return match ($this) {
-            self::CASH => 'Pay with cash when you receive your order',
+            self::CASH => 'Pay minimum 75% within 3 days, balance on delivery',
             self::ECOCASH => 'Pay with EcoCash mobile money - USSD prompt sent to your phone',
             self::PAYNOW => 'Pay via Paynow (Bank transfer, ZimSwitch, etc.)',
             self::PAYPAL => 'Pay with PayPal account or credit/debit card',

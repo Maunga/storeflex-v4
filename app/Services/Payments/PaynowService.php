@@ -75,7 +75,7 @@ class PaynowService implements PaymentGatewayInterface
     {
         try {
             $reference = $orderData['reference'] ?? 'ORDER-' . time();
-            $amount = app()->environment('production') ? $orderData['amount'] : 0.03;
+            $amount = app()->environment('production') ? $orderData['amount'] : 1.00;
             $email = $orderData['email'];
             $phone = $orderData['phone'] ?? '';
             $description = $orderData['description'] ?? 'Storeflex Order';

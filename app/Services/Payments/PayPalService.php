@@ -99,7 +99,7 @@ class PayPalService implements PaymentGatewayInterface
             }
 
             $reference = $orderData['reference'] ?? 'ORDER-' . time();
-            $rawAmount = app()->environment('production') ? $orderData['amount'] : 0.03;
+            $rawAmount = app()->environment('production') ? $orderData['amount'] : 1.00;
             $amount = number_format($rawAmount, 2, '.', '');
             $currency = $orderData['currency'] ?? 'USD';
             $description = $orderData['description'] ?? 'Storeflex Order';
