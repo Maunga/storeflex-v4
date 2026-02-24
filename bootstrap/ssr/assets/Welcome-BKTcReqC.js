@@ -2,7 +2,7 @@ import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useRef, useEffect } from "react";
 import { useRemember, usePage, Link, router } from "@inertiajs/react";
 import { T as Toast } from "./Toast-2CzZTQ7I.js";
-import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DlxMoBaN.js";
 import { S as SEO } from "./SEO-_RAcpsXN.js";
 import axios from "axios";
 const marketingStatements = [

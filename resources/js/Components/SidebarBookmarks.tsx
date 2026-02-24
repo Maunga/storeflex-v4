@@ -46,9 +46,12 @@ function BookmarksContent({ user, bookmarks, activeAsin = null, className = '', 
             </div>
 
             <div className="flex-1 overflow-y-auto">
-                <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3">
+                <h3 className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">
                     Bookmarks
                 </h3>
+                <p className="text-[10px] text-neutral-400 dark:text-neutral-500 mb-3">
+                    Bookmarks expire after 7 days
+                </p>
                 {bookmarks.length > 0 ? (
                     <div className="space-y-2">
                         {bookmarks.map((bookmark) => (
@@ -83,6 +86,7 @@ function BookmarksContent({ user, bookmarks, activeAsin = null, className = '', 
                             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
                         </svg>
                         <p className="text-xs">No bookmarks yet</p>
+                        <p className="text-[10px] mt-1 opacity-75">Bookmarks expire after 7 days</p>
                     </div>
                 )}
             </div>

@@ -1,7 +1,7 @@
 import { jsxs, Fragment, jsx } from "react/jsx-runtime";
 import { useState, useEffect } from "react";
 import { Head, Link } from "@inertiajs/react";
-import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DlxMoBaN.js";
 import axios from "axios";
 const formatDate = (value) => {
   if (!value) return "";

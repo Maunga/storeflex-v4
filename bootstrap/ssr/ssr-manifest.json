@@ -1,18 +1,18 @@
 {
   "node_modules/laravel-vite-plugin/inertia-helpers/index.js": [],
   "node_modules/yet-another-react-lightbox/dist/plugins/thumbnails/thumbnails.css": [
-    "/build/assets/Product-SzH_ENBO.js",
+    "/build/assets/Product-nicPgspP.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "node_modules/yet-another-react-lightbox/dist/styles.css": [
-    "/build/assets/Product-SzH_ENBO.js",
+    "/build/assets/Product-nicPgspP.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "resources/js/Components/SEO.tsx": [
     "/build/assets/SEO-_RAcpsXN.js"
   ],
   "resources/js/Components/SidebarBookmarks.tsx": [
-    "/build/assets/SidebarBookmarks-DXCEFl9f.js"
+    "/build/assets/SidebarBookmarks-DlxMoBaN.js"
   ],
   "resources/js/Components/Toast.tsx": [
     "/build/assets/Toast-2CzZTQ7I.js"
@@ -36,23 +36,23 @@
     "/build/assets/Dashboard-CyVUT-jR.js"
   ],
   "resources/js/Pages/Orders.tsx": [
-    "/build/assets/Orders-CVG99Zp2.js"
+    "/build/assets/Orders-Bacn39iw.js"
   ],
   "resources/js/Pages/Product.tsx": [
-    "/build/assets/Product-SzH_ENBO.js",
+    "/build/assets/Product-nicPgspP.js",
     "/build/assets/Product-nKqu9Wxg.css"
   ],
   "resources/js/Pages/Profile.tsx": [
     "/build/assets/Profile-B2UNc_rF.js"
   ],
   "resources/js/Pages/SearchResults.tsx": [
-    "/build/assets/SearchResults-CLUSRU4R.js"
+    "/build/assets/SearchResults-Bik2Yv5i.js"
   ],
   "resources/js/Pages/Terms.tsx": [
-    "/build/assets/Terms-CA2iqGMr.js"
+    "/build/assets/Terms-2HvfluC5.js"
   ],
   "resources/js/Pages/Welcome.tsx": [
-    "/build/assets/Welcome-h5xknyXT.js"
+    "/build/assets/Welcome-BKTcReqC.js"
   ],
   "resources/js/ssr.tsx": []
 }

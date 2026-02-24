@@ -22,3 +22,5 @@ Schedule::call(function () {
             UpdateAgentxOrderBalance::dispatch($order->id);
         });
 })->everyMinute()->name('sync-unpushed-orders-to-agentx')->withoutOverlapping();
+
+Schedule::command('bookmarks:purge-expired')->daily();

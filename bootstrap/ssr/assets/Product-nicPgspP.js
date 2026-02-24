@@ -5,7 +5,7 @@ import Lightbox from "yet-another-react-lightbox";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails";
 import { T as Toast } from "./Toast-2CzZTQ7I.js";
-import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DlxMoBaN.js";
 import { S as SEO } from "./SEO-_RAcpsXN.js";
 import axios from "axios";
 function Product({ auth, product, identifier, canLogin, canRegister }) {
@@ -51,6 +51,8 @@ function Product({ auth, product, identifier, canLogin, canRegister }) {
         if (res.data.success) {
           setBookmarks((prev) => [res.data.bookmark, ...prev]);
           setIsBookmarked(true);
+          setToastType("info");
+          setToastMessage("Bookmark saved! It will expire in 7 days.");
         }
       }
     } catch (error) {

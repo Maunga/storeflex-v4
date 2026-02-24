@@ -71,6 +71,8 @@ export default function Product({ auth, product, identifier, canLogin, canRegist
                 if (res.data.success) {
                     setBookmarks(prev => [res.data.bookmark, ...prev]);
                     setIsBookmarked(true);
+                    setToastType('info');
+                    setToastMessage('Bookmark saved! It will expire in 7 days.');
                 }
             }
         } catch (error: any) {

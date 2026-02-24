@@ -3,7 +3,7 @@ import { useState, useEffect, useMemo } from "react";
 import { Link, router } from "@inertiajs/react";
 import axios from "axios";
 import NProgress from "nprogress";
-import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DXCEFl9f.js";
+import { S as SidebarBookmarks, B as BookmarksDrawer } from "./SidebarBookmarks-DlxMoBaN.js";
 import { S as SEO } from "./SEO-_RAcpsXN.js";
 function SearchResults({ auth, results, query, canLogin, canRegister }) {
   const [searchQuery, setSearchQuery] = useState(query);

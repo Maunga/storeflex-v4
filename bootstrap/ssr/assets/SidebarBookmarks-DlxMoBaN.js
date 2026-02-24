@@ -31,7 +31,8 @@ function BookmarksContent({ user, bookmarks, activeAsin = null, className = "", 
       ] })
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "flex-1 overflow-y-auto", children: [
-      /* @__PURE__ */ jsx("h3", { className: "text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-3", children: "Bookmarks" }),
+      /* @__PURE__ */ jsx("h3", { className: "text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1", children: "Bookmarks" }),
+      /* @__PURE__ */ jsx("p", { className: "text-[10px] text-neutral-400 dark:text-neutral-500 mb-3", children: "Bookmarks expire after 7 days" }),
       bookmarks.length > 0 ? /* @__PURE__ */ jsx("div", { className: "space-y-2", children: bookmarks.map((bookmark) => /* @__PURE__ */ jsxs(
         Link,
         {
@@ -58,7 +59,8 @@ function BookmarksContent({ user, bookmarks, activeAsin = null, className = "", 
         bookmark.id
       )) }) : /* @__PURE__ */ jsxs("div", { className: "text-center py-8 text-neutral-400 dark:text-neutral-500", children: [
         /* @__PURE__ */ jsx("svg", { className: "w-10 h-10 mx-auto mb-2 opacity-50", viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: "1.5", children: /* @__PURE__ */ jsx("path", { d: "M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" }) }),
-        /* @__PURE__ */ jsx("p", { className: "text-xs", children: "No bookmarks yet" })
+        /* @__PURE__ */ jsx("p", { className: "text-xs", children: "No bookmarks yet" }),
+        /* @__PURE__ */ jsx("p", { className: "text-[10px] mt-1 opacity-75", children: "Bookmarks expire after 7 days" })
       ] })
     ] })
   ] });
