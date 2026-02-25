@@ -395,6 +395,17 @@ class SearchController extends Controller
 
                 // Map Oxylabs fields to expected frontend format
                 $results = array_map(function ($item) {
+                    $priceAed = $item['price_upper'] ?? $item['price'] ?? null;
+                    $shippingAed = 0; // Not available at search level
+                    $estimatedWeight = 0.25; // Default fallback weight (0.2kg × 1.25 contingency)
+
+                    $dxbPrice = null;
+                    if ($priceAed !== null && $priceAed > 0) {
+                        $dxbPrice = $this->amazonAeScraperService->calculatePrice(
+                            $priceAed, $shippingAed, $estimatedWeight
+                        );
+                    }
+
                     return [
                         'asin' => $item['asin'] ?? null,
                         'title' => $item['title'] ?? '',
@@ -402,6 +413,7 @@ class SearchController extends Controller
                         'price_upper' => $item['price_upper'] ?? null,
                         'price_strikethrough' => $item['price_strikethrough'] ?? null,
                         'currency' => $item['currency'] ?? 'AED',
+                        'dxb_price' => $dxbPrice,
                         'rating' => $item['rating'] ?? null,
                         'reviews_count' => $item['reviews_count'] ?? null,
                         'url' => $item['url'] ?? null,

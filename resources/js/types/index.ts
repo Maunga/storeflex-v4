@@ -106,6 +106,7 @@ export interface SearchResultItem {
     price_upper?: number;
     price_strikethrough?: number;
     currency?: string;
+    dxb_price?: string | number | null;
     rating?: number;
     reviews_count?: number;
     url?: string;

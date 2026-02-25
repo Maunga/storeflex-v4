@@ -38,11 +38,13 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
         if (sortBy === 'relevant') return pricedResults;
 
         return [...pricedResults].sort((a, b) => {
+            const priceA = a.price ?? Infinity;
+            const priceB = b.price ?? Infinity;
             switch (sortBy) {
                 case 'price_low':
-                    return (a.price ?? Infinity) - (b.price ?? Infinity);
+                    return priceA - priceB;
                 case 'price_high':
-                    return (b.price ?? 0) - (a.price ?? 0);
+                    return priceB - priceA;
                 case 'rating':
                     return (b.rating ?? 0) - (a.rating ?? 0);
                 default:
@@ -295,7 +297,7 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
 
                                             {/* Price */}
                                             <div className="space-y-0.5 overflow-hidden">
-                                                {item.price != null && (
+                                                {item.price != null ? (
                                                     <>
                                                         <div className="flex items-baseline gap-1 flex-wrap">
                                                             <span className="text-sm sm:text-lg font-bold text-neutral-900 dark:text-white truncate">
@@ -307,11 +309,13 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
                                                                 </span>
                                                             )}
                                                         </div>
-                                                        <span className="text-xs sm:text-sm font-semibold text-emerald-600 dark:text-[#86efac]">
-                                                            ${(item.price * 0.27).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
-                                                        </span>
+                                                        {item.dxb_price != null && (
+                                                            <span className="text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400">
+                                                                est. ~${parseFloat(String(item.dxb_price)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+                                                            </span>
+                                                        )}
                                                     </>
-                                                )}
+                                                ) : null}
                                             </div>
 
                                             {/* Shipping - hidden on mobile */}
