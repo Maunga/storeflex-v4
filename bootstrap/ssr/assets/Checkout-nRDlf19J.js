@@ -120,7 +120,6 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
     } catch (error) {
       console.error("Error loading data:", error);
       setToastType("error");
-      setToastMessage("Failed to load checkout data");
     }
   }
   const handleShippingSubmit = (e) => {

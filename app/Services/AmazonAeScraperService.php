@@ -52,14 +52,14 @@ class AmazonAeScraperService implements EcommerceScraperInterface
             }
         }
 
-        if (!$isAllowed && App::environment('production')) {
-            // Log the blocked request
-            Log::channel('scrape')->info('Blocked request:', ['message' => 'Blocked: ' . $origin, 'url' => $given_url]);
-            return [
-                'success' => false,
-                'message' => 'Request blocked due to unauthorized origin.',
-            ];
-        }
+        // if (!$isAllowed && App::environment('production')) {
+        //     // Log the blocked request
+        //     Log::channel('scrape')->info('Blocked request:', ['message' => 'Blocked: ' . $origin, 'url' => $given_url]);
+        //     return [
+        //         'success' => false,
+        //         'message' => 'Request blocked due to unauthorized origin.',
+        //     ];
+        // }
 
         $scrape_resp = $this->scrape($given_url);
 

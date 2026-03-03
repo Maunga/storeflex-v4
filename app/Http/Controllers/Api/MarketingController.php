@@ -15,7 +15,6 @@ enum CacheKeys: string
     case TRENDING_ITEMS = 'trending_items';
     case POPULAR_ITEMS = 'popular_items';
     case DISCOVER_ITEMS = 'discover_items';
-    case ALIEXPRESS_ITEMS = 'aliexpress_items';
     case AMAZONAE_ITEMS = 'amazonae_items';
 }
 
@@ -87,13 +86,6 @@ class MarketingController extends Controller
         }, CacheKeys::DISCOVER_ITEMS);
 
         return ['data' => $items->shuffle()];
-    }
-
-    public function aliexpressItems(Request $req)
-    {
-        return $this->getItems(18, function () {
-            return WeightInformation::where('store', 'ALIEXPRESS')->orderBy('views', 'asc');
-        }, CacheKeys::ALIEXPRESS_ITEMS);
     }
 
     public function amazonaeItems(Request $req)

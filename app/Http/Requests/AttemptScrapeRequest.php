@@ -17,9 +17,6 @@ class AttemptScrapeRequest extends FormRequest
     protected $allowedDomains = [
         'www.amazon.com',
         'www.amazon.ae',
-        'www.aliexpress.com',
-        'www.shein.com',
-        'www.noon.com',
     ];
 
     /**

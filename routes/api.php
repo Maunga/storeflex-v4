@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\ProductRetrievalController;
 use App\Http\Controllers\Api\UploadController;
 use App\Http\Controllers\Api\ViewController;
 use App\Http\Controllers\Api\ScrapeController;
+use App\Http\Controllers\SearchController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -40,7 +41,6 @@ Route::group(['prefix' => 'marketing'], function () {
     Route::get('recent-items', [MarketingController::class, 'recentItems']);
     Route::get('trending-items', [MarketingController::class, 'trendingItems']);
     Route::get('amazonae-items', [MarketingController::class, 'amazonaeItems']);
-    Route::get('aliexpress-items', [MarketingController::class, 'aliexpressItems']);
 });
 
 Route::group(['prefix' => 'orders'], function () {
@@ -67,4 +67,9 @@ Route::group(['prefix' => 'store'], function () {
     Route::post('upload', UploadController::class);
     Route::post('upload/multiple', [UploadController::class, 'multiple']);
     Route::get('{identifier}', ViewController::class);
+});
+
+Route::group(['prefix' => 'search'], function () {
+    Route::post('/', [SearchController::class, 'apiSearch']);
+    Route::get('/prefetch', [SearchController::class, 'prefetchProduct']);
 });

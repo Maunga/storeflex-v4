@@ -202,7 +202,7 @@ export default function Checkout({ auth, product, identifier, savedCheckoutData 
         } catch (error) {
             console.error('Error loading data:', error);
             setToastType('error');
-            setToastMessage('Failed to load checkout data');
+            //setToastMessage('Failed to load checkout data');
         }
     }
 

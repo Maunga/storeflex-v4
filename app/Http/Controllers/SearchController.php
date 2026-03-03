@@ -38,6 +38,62 @@ class SearchController extends Controller
     }
 
     /**
+     * POST /api/search — API endpoint for searching products by description.
+     * Returns JSON with search results.
+     */
+    public function apiSearch(Request $request)
+    {
+        $request->validate([
+            'query' => 'required|string|max:2000',
+        ]);
+
+        $query = trim($request->input('query'));
+
+        // Check if it's an Amazon URL - scrape it directly
+        if ($this->isAmazonAeUrl($query)) {
+            $result = $this->amazonAeScraperService->attemptScrape($query);
+            
+            if (!empty($result['success']) && !empty($result['data']['item'])) {
+                return response()->json([
+                    'success' => true,
+                    'type' => 'product',
+                    'data' => $result['data']['item'],
+                ]);
+            }
+            
+            return response()->json([
+                'success' => false,
+                'message' => $result['message'] ?? 'Product not found or no longer available.',
+            ], 404);
+        }
+
+        // Text search
+        $cacheKey = 'search_results_' . md5(strtolower($query));
+        $results = Cache::get($cacheKey);
+
+        if ($results === null) {
+            $results = $this->performTextSearch($query);
+
+            if ($results === null) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Search failed. Please try again later.',
+                ], 500);
+            }
+
+            Cache::put($cacheKey, $results, now()->addMinutes(30));
+        }
+
+        return response()->json([
+            'success' => true,
+            'type' => 'search',
+            'query' => $query,
+            'count' => count($results),
+            'data' => $results,
+        ]);
+    }
+
+    /**
      * GET /product/prefetch — Prefetch a product by ASIN via AJAX before navigation.
      * Returns JSON so frontend can wait for scrape before navigating.
      */
