@@ -662,31 +662,31 @@
                         </form>
 
                         <div class="quick-actions animate-fade-in animate-delay-3">
-                            <button class="quick-action" onclick="document.querySelector('.search-textarea').value='https://www.amazon.ae/dp/'; document.querySelector('.search-textarea').focus();">
+                            <button class="quick-action" onclick="document.querySelector('.search-textarea').value='Electronics'; document.querySelector('.search-textarea').closest('form').submit();">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                                 </svg>
                                 Electronics
                             </button>
-                            <button class="quick-action" onclick="document.querySelector('.search-textarea').value='Fashion accessories'; document.querySelector('.search-textarea').focus();">
+                            <button class="quick-action" onclick="document.querySelector('.search-textarea').value='Fashion accessories'; document.querySelector('.search-textarea').closest('form').submit();">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46A2 2 0 0 0 2 5.38v13.24a2 2 0 0 0 1.62 1.96L8 22a4 4 0 0 0 8 0l4.38-1.42A2 2 0 0 0 22 18.62V5.38a2 2 0 0 0-1.62-1.92z"></path>
                                 </svg>
                                 Fashion
                             </button>
-                            <button class="quick-action" onclick="document.querySelector('.search-textarea').value='Home kitchen items'; document.querySelector('.search-textarea').focus();">
+                            <button class="quick-action" onclick="document.querySelector('.search-textarea').value='Laptops'; document.querySelector('.search-textarea').closest('form').submit();">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                     <polyline points="9 22 9 12 15 12 15 22"></polyline>
                                 </svg>
-                                Home & Kitchen
+                                Laptops
                             </button>
-                            <button class="quick-action" onclick="document.querySelector('.search-textarea').value='Sports outdoor gear'; document.querySelector('.search-textarea').focus();">
+                            <button class="quick-action" onclick="document.querySelector('.search-textarea').value='Smartphones'; document.querySelector('.search-textarea').closest('form').submit();">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
                                 </svg>
-                                Sports
+                                Smartphones
                             </button>
                         </div>
                     </div>

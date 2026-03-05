@@ -87,7 +87,10 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
 
     const setQuickAction = (value: string) => {
         setQuery(value);
-        textareaRef.current?.focus();
+        setLoading(true);
+        router.get('/search', { q: value }, {
+            onFinish: () => setLoading(false),
+        });
     };
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -122,7 +125,7 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
             {loading && (
                 <div className="fixed inset-0 bg-white/60 dark:bg-neutral-950/60 z-50 flex items-center justify-center backdrop-blur-sm">
                     <div className="flex flex-col items-center gap-3 animate-fade-in">
-                        <div className="w-10 h-10 border-4 border-neutral-200 border-t-[#86efac] rounded-full animate-spin" />
+                        <div className="w-10 h-10 border-4 border-neutral-200 border-t-[#22c55e] rounded-full animate-spin" />
                         <span className="text-sm text-neutral-500 dark:text-neutral-400">Searching...</span>
                     </div>
                 </div>
@@ -222,7 +225,7 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                             </p>
 
                             <form onSubmit={handleSubmit} className="w-full max-w-[640px] mx-auto animate-fade-in animation-delay-200">
-                                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow focus-within:border-[#86efac] focus-within:ring-[3px] focus-within:ring-[#86efac]/15">
+                                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow focus-within:border-[#22c55e] focus-within:ring-[3px] focus-within:ring-[#22c55e]/15">
                                     <textarea
                                         ref={textareaRef}
                                         name="query"
@@ -251,7 +254,7 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                                         </div>
                                         <button
                                             type="submit"
-                                            className="flex items-center justify-center w-10 h-10 bg-[#86efac] hover:bg-[#61113E] text-white rounded-[10px] transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                                            className="flex items-center justify-center w-10 h-10 bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-[10px] transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                                             disabled={!query.trim()}
                                         >
                                             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -272,31 +275,31 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                                     label="Electronics"
                                 />
                                 <QuickActionButton
-                                    onClick={() => setQuickAction('Fashion accessories')}
+                                    onClick={() => setQuickAction('Iphones')}
                                     icon={
                                         <path d="M20.38 3.46L16 2a4 4 0 0 0-8 0L3.62 3.46A2 2 0 0 0 2 5.38v13.24a2 2 0 0 0 1.62 1.96L8 22a4 4 0 0 0 8 0l4.38-1.42A2 2 0 0 0 22 18.62V5.38a2 2 0 0 0-1.62-1.92z"></path>
                                     }
-                                    label="Fashion"
+                                    label="Iphones"
                                 />
                                 <QuickActionButton
-                                    onClick={() => setQuickAction('Home kitchen items')}
+                                    onClick={() => setQuickAction('Laptops')}
                                     icon={
                                         <>
                                             <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                             <polyline points="9 22 9 12 15 12 15 22"></polyline>
                                         </>
                                     }
-                                    label="Home & Kitchen"
+                                    label="Laptops"
                                 />
                                 <QuickActionButton
-                                    onClick={() => setQuickAction('Sports outdoor gear')}
+                                    onClick={() => setQuickAction('Android')}
                                     icon={
                                         <>
                                             <circle cx="12" cy="12" r="10"></circle>
                                             <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
                                         </>
                                     }
-                                    label="Sports"
+                                    label="Android Phones"
                                 />
                             </div>
                         </div>
@@ -333,7 +336,7 @@ function QuickActionButton({ onClick, icon, label }: QuickActionButtonProps) {
         <button
             type="button"
             onClick={onClick}
-            className="flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[10px] hover:border-[#86efac] hover:text-[#86efac] transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 text-sm text-neutral-500 dark:text-neutral-400 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-[10px] hover:border-[#22c55e] hover:text-[#22c55e] transition-colors"
         >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 {icon}
