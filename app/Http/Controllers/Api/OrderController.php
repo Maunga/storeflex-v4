@@ -86,7 +86,8 @@ class OrderController extends Controller
             'woocommerce_order_id' => $create_order['order_id'],
             'total' => $create_order['total'],
             'balance' => $create_order['total'],
-            'payment_method' => request()->get('extras')['payment_method']['title']
+            'payment_method' => request()->get('extras')['payment_method']['title'],
+            'pushed' => true, // Order has been pushed to WooCommerce
         ];
 
         if ($request->user()) {

@@ -1,7 +1,9 @@
 <?php
 
+use App\Jobs\PushOrderPaymentJob;
 use App\Jobs\UpdateAgentxOrderBalance;
 use App\Models\Order;
+use App\Models\PaymentReceipt;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
@@ -11,16 +13,19 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// Push unpushed payments to AgentX every 5 minutes
 Schedule::call(function () {
-    Order::where('pushed', false)
-        ->where('amount_paid', '>', 0)
-        ->each(function ($order) {
-            Log::info('Scheduling UpdateAgentxOrderBalance job for unpushed order', [
-                'order_id' => $order->id,
-                'amount_paid' => $order->amount_paid,
+    // Find paid receipts that haven't been pushed yet
+    PaymentReceipt::where('status', 'paid')
+        ->where('pushed', false)
+        ->each(function ($payment) {
+            Log::info('Scheduling PushOrderPaymentJob for unpushed payment', [
+                'payment_id' => $payment->id,
+                'order_id' => $payment->order_id,
+                'amount' => $payment->amount,
             ]);
-            UpdateAgentxOrderBalance::dispatch($order->id);
+            PushOrderPaymentJob::dispatch($payment->id);
         });
-})->everyMinute()->name('sync-unpushed-orders-to-agentx')->withoutOverlapping();
+})->everyFiveMinutes()->name('push-unpushed-payments-to-agentx')->withoutOverlapping();
 
 Schedule::command('bookmarks:purge-expired')->daily();

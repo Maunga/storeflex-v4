@@ -205,6 +205,7 @@ class CheckoutApiController extends Controller
             'total' => $create_order['total'],
             'balance' => $create_order['total'],
             'payment_method' => $validated['extras']['payment_method']['title'],
+            'pushed' => true, // Order has been pushed to WooCommerce
         ];
 
         if ($request->user()) {

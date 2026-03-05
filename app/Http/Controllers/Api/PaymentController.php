@@ -462,12 +462,12 @@ class PaymentController extends Controller
         Log::info('Payment receipt created', ['receipt_id' => $receipt->id, 'order_id' => $order->id]);
 
         // Dispatch job to sync with WooCommerce using actual amount
-        SyncPaymentToWooCommerce::dispatch(
-            orderId: $order->id,
-            amountPaid: $actualAmountPaid,
-            provider: $provider,
-            providerReference: $providerReference
-        );
+        // SyncPaymentToWooCommerce::dispatch(
+        //     orderId: $order->id,
+        //     amountPaid: $actualAmountPaid,
+        //     provider: $provider,
+        //     providerReference: $providerReference
+        // );
 
         Log::info('SyncPaymentToWooCommerce job dispatched', ['order_id' => $order->id]);
         

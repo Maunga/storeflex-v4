@@ -20,6 +20,7 @@ class PaymentReceipt extends Model
         'status',
         'metadata',
         'paid_at',
+        'pushed',
     ];
 
     protected $casts = [
@@ -28,6 +29,7 @@ class PaymentReceipt extends Model
         'paid_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'pushed' => 'boolean',
     ];
 
     /**
