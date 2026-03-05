@@ -35,6 +35,7 @@ return new class extends Migration
             $table->enum('status', ['pending', 'paid', 'failed', 'refunded'])->default('pending');
             $table->json('metadata')->nullable(); // Store raw provider response
             $table->timestamp('paid_at')->nullable();
+            $table->boolean('pushed')->default(false);
             $table->timestamps();
         });
     }

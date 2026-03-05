@@ -41,14 +41,6 @@ class PaymentController extends Controller
                 'requires_phone' => true,
             ],
             [
-                'id' => PaymentProvider::PAYPAL->value,
-                'title' => PaymentProvider::PAYPAL->label(),
-                'description' => PaymentProvider::PAYPAL->description(),
-                'icon' => PaymentProvider::PAYPAL->icon(),
-                'type' => 'redirect',
-                'requires_phone' => false,
-            ],
-            [
                 'id' => PaymentProvider::STRIPE->value,
                 'title' => PaymentProvider::STRIPE->label(),
                 'description' => PaymentProvider::STRIPE->description(),
@@ -291,10 +283,16 @@ class PaymentController extends Controller
 
         // Process payment if completed
         if (($result['event'] ?? '') === 'payment_completed' && ($result['paid'] ?? false)) {
+            // Get the provider reference (session_id, payment_intent_id, or charge_id)
+            $providerReference = $result['session_id'] 
+                ?? $result['payment_intent_id'] 
+                ?? $result['charge_id'] 
+                ?? null;
+
             $this->processSuccessfulPayment(
                 reference: $result['reference'] ?? '',
                 provider: 'stripe',
-                providerReference: $result['session_id'] ?? null,
+                providerReference: $providerReference,
                 amount: (float) ($result['amount_total'] ?? 0),
                 metadata: $result
             );

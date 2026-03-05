@@ -107,7 +107,6 @@ services:
             - 8.8.8.8
             - 8.8.4.4
         command: 'php artisan queue:work --sleep=3 --tries=3 --timeout=90 --queue=default,high,low'
-
     soketi:
         image: 'quay.io/soketi/soketi:latest-16-alpine'
         environment:

@@ -35,6 +35,16 @@ Route::group(['prefix' => 'payments'], function () {
     Route::post('/paypal/webhook', [PaymentController::class, 'paypalWebhook']);
 });
 
+// Webhook routes (alternative paths)
+Route::group(['prefix' => 'webhook'], function () {
+    Route::post('/stripe', [PaymentController::class, 'stripeWebhook']);
+    Route::post('/paynow', [PaymentController::class, 'paynowWebhook']);
+    Route::post('/paypal', [PaymentController::class, 'paypalWebhook']);
+});
+
+// Stripe webhook at /api/stripe/webhook
+Route::post('/stripe/webhook', [PaymentController::class, 'stripeWebhook']);
+
 Route::group(['prefix' => 'marketing'], function () {
     Route::get('discover-items', [MarketingController::class, 'discoverItems']);
     Route::get('popular-items', [MarketingController::class, 'popularItems']);

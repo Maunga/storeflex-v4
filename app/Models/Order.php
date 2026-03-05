@@ -37,8 +37,6 @@ class Order extends Model
                 'balance' => $orderArr['balance'] / 100,
                 'amount_paid' => $orderArr['amount_paid'] / 100,
             ]);
-
-          
         });
     }
 
@@ -153,8 +151,22 @@ class Order extends Model
             return self::find($parts[1]);
         }
 
-        // Also check payment_reference column
-        return self::where('payment_reference', $reference)->first();
+        // Check payment_reference column on order
+        $order = self::where('payment_reference', $reference)->first();
+        if ($order) {
+            return $order;
+        }
+
+        // Check PaymentReceipt table for the reference
+        $receipt = PaymentReceipt::where('reference', $reference)
+            ->where('status', 'paid')
+            ->first();
+        
+        if ($receipt && $receipt->order_id) {
+            return self::find($receipt->order_id);
+        }
+
+        return null;
     }
 
     public function shipping_details(): HasOne

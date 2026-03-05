@@ -270,6 +270,7 @@ class StripeService implements PaymentGatewayInterface
         $type = $event['type'] ?? '';
         $object = $event['data']['object'] ?? [];
 
+        // Handle checkout.session.completed (Checkout Sessions flow)
         if ($type === 'checkout.session.completed') {
             return [
                 'success' => true,
@@ -280,6 +281,46 @@ class StripeService implements PaymentGatewayInterface
                 'reference' => $object['client_reference_id'] ?? null,
                 'customer_email' => $object['customer_email'] ?? null,
                 'amount_total' => ($object['amount_total'] ?? 0) / 100,
+            ];
+        }
+
+        // Handle payment_intent.succeeded (Payment Intents / Elements flow)
+        if ($type === 'payment_intent.succeeded') {
+            $metadata = $object['metadata'] ?? [];
+            $charges = $object['charges']['data'] ?? [];
+            $firstCharge = $charges[0] ?? [];
+            $billingDetails = $firstCharge['billing_details'] ?? [];
+            
+            return [
+                'success' => true,
+                'event' => 'payment_completed',
+                'status' => 'paid',
+                'paid' => true,
+                'payment_intent_id' => $object['id'] ?? null,
+                'reference' => $metadata['order_reference'] ?? $metadata['reference'] ?? null,
+                'order_id' => $metadata['order_id'] ?? null,
+                'payment_portion' => $metadata['payment_portion'] ?? 100,
+                'customer_email' => $billingDetails['email'] ?? null,
+                'amount_total' => ($object['amount'] ?? 0) / 100,
+            ];
+        }
+
+        // Handle charge.succeeded as fallback
+        if ($type === 'charge.succeeded') {
+            $metadata = $object['metadata'] ?? [];
+            $billingDetails = $object['billing_details'] ?? [];
+            
+            return [
+                'success' => true,
+                'event' => 'payment_completed',
+                'status' => 'paid',
+                'paid' => true,
+                'charge_id' => $object['id'] ?? null,
+                'reference' => $metadata['order_reference'] ?? $metadata['reference'] ?? null,
+                'order_id' => $metadata['order_id'] ?? null,
+                'payment_portion' => $metadata['payment_portion'] ?? 100,
+                'customer_email' => $billingDetails['email'] ?? null,
+                'amount_total' => ($object['amount'] ?? 0) / 100,
             ];
         }
 
