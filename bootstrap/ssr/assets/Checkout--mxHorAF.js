@@ -1090,8 +1090,14 @@ function Checkout({ auth, product, identifier, savedCheckoutData }) {
                       /* @__PURE__ */ jsxs("div", { className: "w-10 h-10 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center", children: [
                         method.icon === "ecocash" && /* @__PURE__ */ jsx("span", { className: "text-lg font-bold text-green-600", children: "EC" }),
                         method.icon === "paynow" && /* @__PURE__ */ jsx("span", { className: "text-lg font-bold text-blue-600", children: "PN" }),
-                        method.icon === "paypal" && /* @__PURE__ */ jsx("span", { className: "text-lg font-bold text-blue-500", children: "PP" }),
-                        method.icon === "stripe" && /* @__PURE__ */ jsx("span", { className: "text-lg font-bold text-purple-600", children: "S" }),
+                        method.icon === "paypal" && /* @__PURE__ */ jsxs("svg", { className: "w-6 h-6", viewBox: "0 0 24 24", fill: "none", children: [
+                          /* @__PURE__ */ jsx("path", { d: "M19.5 8.5c0 4-3.5 7-8 7h-1l-1 4H6l-.5 1H2l3-14h6c3.5 0 8.5 0 8.5 3z", stroke: "#003087", strokeWidth: "1.5", strokeLinecap: "round", strokeLinejoin: "round" }),
+                          /* @__PURE__ */ jsx("path", { d: "M17 6c0 4-3 6.5-7.5 6.5", stroke: "#009cde", strokeWidth: "1.5", strokeLinecap: "round" })
+                        ] }),
+                        method.icon === "stripe" && /* @__PURE__ */ jsxs("svg", { className: "w-6 h-6", viewBox: "0 0 24 24", fill: "none", children: [
+                          /* @__PURE__ */ jsx("rect", { x: "2", y: "5", width: "20", height: "14", rx: "3", stroke: "#635bff", strokeWidth: "1.5" }),
+                          /* @__PURE__ */ jsx("path", { d: "M8 12.5c0-2 1.5-3 3-3 1 0 1.8.5 1.8 1.3 0 2-4.8 1.2-4.8 3.7 0 1 .8 1.5 2 1.5 1 0 2-.5 2.5-1", stroke: "#635bff", strokeWidth: "1.5", strokeLinecap: "round" })
+                        ] }),
                         method.icon === "cash" && /* @__PURE__ */ jsx("svg", { className: "w-5 h-5 text-green-600", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" }) }),
                         !method.icon && /* @__PURE__ */ jsx("svg", { className: "w-5 h-5 text-neutral-400", fill: "none", viewBox: "0 0 24 24", stroke: "currentColor", children: /* @__PURE__ */ jsx("path", { strokeLinecap: "round", strokeLinejoin: "round", strokeWidth: 2, d: "M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" }) })
                       ] }),

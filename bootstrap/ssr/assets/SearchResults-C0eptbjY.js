@@ -22,11 +22,13 @@ function SearchResults({ auth, results, query, canLogin, canRegister }) {
     const pricedResults = results.filter((item) => (item.price ?? 0) > 0);
     if (sortBy === "relevant") return pricedResults;
     return [...pricedResults].sort((a, b) => {
+      const priceA = a.price ?? Infinity;
+      const priceB = b.price ?? Infinity;
       switch (sortBy) {
         case "price_low":
-          return (a.price ?? Infinity) - (b.price ?? Infinity);
+          return priceA - priceB;
         case "price_high":
-          return (b.price ?? 0) - (a.price ?? 0);
+          return priceB - priceA;
         case "rating":
           return (b.rating ?? 0) - (a.rating ?? 0);
         default:
@@ -226,7 +228,7 @@ function SearchResults({ auth, results, query, canLogin, canRegister }) {
                       ")"
                     ] })
                   ] }),
-                  /* @__PURE__ */ jsx("div", { className: "space-y-0.5 overflow-hidden", children: item.price != null && /* @__PURE__ */ jsxs(Fragment, { children: [
+                  /* @__PURE__ */ jsx("div", { className: "space-y-0.5 overflow-hidden", children: item.price != null ? /* @__PURE__ */ jsxs(Fragment, { children: [
                     /* @__PURE__ */ jsxs("div", { className: "flex items-baseline gap-1 flex-wrap", children: [
                       /* @__PURE__ */ jsxs("span", { className: "text-sm sm:text-lg font-bold text-neutral-900 dark:text-white truncate", children: [
                         item.currency ?? "AED",
@@ -235,12 +237,12 @@ function SearchResults({ auth, results, query, canLogin, canRegister }) {
                       ] }),
                       item.price_strikethrough != null && item.price_strikethrough > 0 && /* @__PURE__ */ jsx("span", { className: "text-[10px] sm:text-xs text-neutral-400 line-through", children: item.price_strikethrough })
                     ] }),
-                    /* @__PURE__ */ jsxs("span", { className: "text-xs sm:text-sm font-semibold text-emerald-600 dark:text-[#86efac]", children: [
-                      "$",
-                      (item.price * 0.27).toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    item.dxb_price != null && /* @__PURE__ */ jsxs("span", { className: "text-[10px] sm:text-xs text-neutral-500 dark:text-neutral-400", children: [
+                      "est. ~$",
+                      parseFloat(String(item.dxb_price)).toLocaleString(void 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
                       " USD"
                     ] })
-                  ] }) }),
+                  ] }) : null }),
                   item.shipping_information && /* @__PURE__ */ jsx("p", { className: "hidden sm:block text-[11px] text-neutral-400 dark:text-neutral-500 leading-snug line-clamp-1", children: item.shipping_information })
                 ] })
               ]
