@@ -3,6 +3,7 @@ import { Link, router, usePage, useRemember } from '@inertiajs/react';
 import { PageProps, Bookmark } from '@/types';
 import Toast from '@/Components/Toast';
 import SidebarBookmarks, { BookmarksDrawer } from '@/Components/SidebarBookmarks';
+import CartDrawer, { CartIcon } from '@/Components/CartDrawer';
 import SEO from '@/Components/SEO';
 import axios from 'axios';
 
@@ -32,6 +33,7 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
     const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
     const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
     const [isTextareaFocused, setIsTextareaFocused] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
     
     // Typing animation state
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -198,9 +200,13 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                                         )}
                                     </>
                                 )}
+                                <CartIcon onClick={() => setIsCartOpen(true)} />
                             </nav>
                         )}
                     </header>
+
+                    {/* Cart Drawer */}
+                    <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
                     {/* Hero Section */}
                     <main className="flex-1 flex flex-col items-center justify-center px-6 py-10 text-center">

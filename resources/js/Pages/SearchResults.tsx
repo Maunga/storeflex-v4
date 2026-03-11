@@ -4,6 +4,7 @@ import { PageProps, SearchResultItem, Bookmark } from '@/types';
 import axios from 'axios';
 import NProgress from 'nprogress';
 import SidebarBookmarks, { BookmarksDrawer } from '@/Components/SidebarBookmarks';
+import CartDrawer, { CartIcon } from '@/Components/CartDrawer';
 import SEO from '@/Components/SEO';
 
 type SortOption = 'relevant' | 'price_low' | 'price_high' | 'rating';
@@ -22,6 +23,7 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
     const [sortBy, setSortBy] = useState<SortOption>('relevant');
     const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
     const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
 
     // Load bookmarks when logged in
     useEffect(() => {
@@ -197,9 +199,13 @@ export default function SearchResults({ auth, results, query, canLogin, canRegis
                                         )}
                                     </>
                                 )}
+                                <CartIcon onClick={() => setIsCartOpen(true)} />
                             </nav>
                         )}
                     </header>
+
+                    {/* Cart Drawer */}
+                    <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
                     {/* Loading overlay */}
                     {loading && (

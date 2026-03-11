@@ -4,6 +4,7 @@ import './bootstrap';
 import { createInertiaApp } from '@inertiajs/react';
 import { hydrateRoot } from 'react-dom/client';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+import { CartProvider } from '@/Contexts/CartContext';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Storeflex';
 
@@ -15,7 +16,12 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.tsx')
         ),
     setup({ el, App, props }) {
-        hydrateRoot(el, <App {...props} />);
+        hydrateRoot(
+            el,
+            <CartProvider>
+                <App {...props} />
+            </CartProvider>
+        );
     },
     progress: {
         color: '#86efac',

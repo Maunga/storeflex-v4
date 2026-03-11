@@ -178,6 +178,54 @@ class CheckoutController extends Controller
     }
 
     /**
+     * Show the cart page for multi-item checkout
+     */
+    public function cart(Request $request): Response
+    {
+        $checkoutData = [
+            'shipping' => null,
+            'billing' => null,
+        ];
+
+        // If user is logged in, get their saved checkout profile or last order
+        if ($request->user()) {
+            $profile = $request->user()->checkoutProfile;
+            
+            if ($profile) {
+                $checkoutData = [
+                    'shipping' => $profile->shipping_data,
+                    'billing' => $profile->billing_data,
+                ];
+            } else {
+                // Try to get data from last order
+                $lastOrder = Order::where('user_id', $request->user()->id)
+                    ->with(['shipping_details', 'billing_details'])
+                    ->latest()
+                    ->first();
+                
+                if ($lastOrder) {
+                    if ($lastOrder->shipping_details) {
+                        $checkoutData['shipping'] = $lastOrder->shipping_details->only([
+                            'first_name', 'last_name', 'address_1', 'address_2',
+                            'city', 'state', 'postcode', 'country', 'email', 'phone'
+                        ]);
+                    }
+                    if ($lastOrder->billing_details) {
+                        $checkoutData['billing'] = $lastOrder->billing_details->only([
+                            'first_name', 'last_name', 'address_1', 'address_2',
+                            'city', 'state', 'postcode', 'country', 'email', 'phone'
+                        ]);
+                    }
+                }
+            }
+        }
+
+        return Inertia::render('Cart', [
+            'savedCheckoutData' => $checkoutData,
+        ]);
+    }
+
+    /**
      * Show the checkout success page
      */
     public function success(Request $request): Response

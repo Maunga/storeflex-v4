@@ -38,6 +38,7 @@ Route::get('/product/{asin}', [SearchController::class, 'showProduct'])->name('p
 
 // Checkout
 Route::get('/checkout/{asin}', [CheckoutController::class, 'show'])->name('checkout.show');
+Route::get('/cart', [CheckoutController::class, 'cart'])->name('cart');
 Route::post('/checkout/save-profile', [CheckoutController::class, 'saveProfile'])->middleware('auth')->name('checkout.saveProfile');
 Route::get('/checkout/payment/callback', [\App\Http\Controllers\Api\PaymentController::class, 'callback'])->name('checkout.payment.callback');
 Route::get('/checkout/payment/cancel', function () {

@@ -6,6 +6,8 @@ import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails';
 import Toast from '@/Components/Toast';
 import SidebarBookmarks, { BookmarksDrawer } from '@/Components/SidebarBookmarks';
+import CartDrawer, { CartIcon } from '@/Components/CartDrawer';
+import { useCart } from '@/Contexts/CartContext';
 import SEO from '@/Components/SEO';
 import axios from 'axios';
 import 'yet-another-react-lightbox/styles.css';
@@ -27,6 +29,27 @@ export default function Product({ auth, product, identifier, canLogin, canRegist
     const [toastMessage, setToastMessage] = useState<string | null>(null);
     const [toastType, setToastType] = useState<'error' | 'success' | 'info'>('info');
     const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    
+    const { addItem, isInCart } = useCart();
+    const [addedToCart, setAddedToCart] = useState(false);
+
+    // Check if item is in cart on mount
+    useEffect(() => {
+        if (identifier) {
+            setAddedToCart(isInCart(identifier));
+        }
+    }, [identifier, isInCart]);
+
+    const handleAddToCart = () => {
+        if (!identifier) return;
+        addItem(product, identifier);
+        setAddedToCart(true);
+        setToastType('success');
+        setToastMessage('Added to cart!');
+        // Open the cart drawer to show the item
+        setTimeout(() => setIsCartOpen(true), 300);
+    };
 
     // Load bookmarks when logged in
     useEffect(() => {
@@ -175,9 +198,13 @@ export default function Product({ auth, product, identifier, canLogin, canRegist
                                         )}
                                     </>
                                 )}
+                                <CartIcon onClick={() => setIsCartOpen(true)} />
                             </nav>
                         )}
                     </header>
+
+                    {/* Cart Drawer */}
+                    <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
 
                     {/* Product Content */}
                     <main className="flex-1 px-4 sm:px-6 py-8 sm:py-10">
@@ -454,17 +481,44 @@ export default function Product({ auth, product, identifier, canLogin, canRegist
 
                                     {/* Buy Button */}
                                     {product.price != null && product.price > 0 && product.stock !== 'Currently unavailable' && !product.stock?.toLowerCase().startsWith('temporarily out of stock') && (
-                                        <Link
-                                            href={`/checkout/${identifier}`}
-                                            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:text-neutral-900 dark:hover:bg-emerald-400 rounded-lg transition-colors shadow-sm"
-                                        >
-                                            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <circle cx="9" cy="21" r="1" />
-                                                <circle cx="20" cy="21" r="1" />
-                                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                                            </svg>
-                                            Buy Now
-                                        </Link>
+                                        <div className="space-y-3">
+                                            <Link
+                                                href={`/checkout/${identifier}`}
+                                                className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-700 dark:bg-[#86efac] dark:text-neutral-900 dark:hover:bg-emerald-400 rounded-lg transition-colors shadow-sm"
+                                            >
+                                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <circle cx="9" cy="21" r="1" />
+                                                    <circle cx="20" cy="21" r="1" />
+                                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                                                </svg>
+                                                Buy Now
+                                            </Link>
+                                            <button
+                                                onClick={handleAddToCart}
+                                                className={`w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-base font-semibold rounded-lg transition-colors ${
+                                                    addedToCart
+                                                        ? 'text-emerald-700 dark:text-[#86efac] bg-emerald-50 dark:bg-emerald-900/20 border-2 border-emerald-500 dark:border-[#86efac]'
+                                                        : 'text-neutral-700 dark:text-neutral-300 bg-neutral-100 dark:bg-neutral-800 hover:bg-neutral-200 dark:hover:bg-neutral-700 border-2 border-transparent'
+                                                }`}
+                                            >
+                                                {addedToCart ? (
+                                                    <>
+                                                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <polyline points="20 6 9 17 4 12" />
+                                                        </svg>
+                                                        Added to Cart
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <line x1="12" y1="5" x2="12" y2="19" />
+                                                            <line x1="5" y1="12" x2="19" y2="12" />
+                                                        </svg>
+                                                        Add to Cart
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
                                     )}
 
 
