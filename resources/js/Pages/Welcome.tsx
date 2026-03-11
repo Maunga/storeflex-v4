@@ -31,6 +31,7 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
     const shownToastRef = useRef<string | null>(null);
     const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
     const [isBookmarksOpen, setIsBookmarksOpen] = useState(false);
+    const [isTextareaFocused, setIsTextareaFocused] = useState(false);
     
     // Typing animation state
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -225,13 +226,21 @@ export default function Welcome({ auth, canLogin, canRegister }: WelcomeProps) {
                             </p>
 
                             <form onSubmit={handleSubmit} className="w-full max-w-[640px] mx-auto animate-fade-in animation-delay-200">
-                                <div className="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow focus-within:border-[#22c55e] focus-within:ring-[3px] focus-within:ring-[#22c55e]/15">
+                                <div className={`bg-white dark:bg-neutral-900 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ease-out ${
+                                    isTextareaFocused 
+                                        ? 'border border-purple-400 ring-[2px] ring-purple-400/10 shadow-md shadow-purple-400/5' 
+                                        : 'border border-neutral-200 dark:border-neutral-700'
+                                }`}>
                                     <textarea
                                         ref={textareaRef}
                                         name="query"
                                         value={query}
                                         onChange={handleTextareaInput}
-                                        className="w-full min-h-[64px] max-h-[200px] p-5 pr-[60px] text-base leading-relaxed bg-transparent text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 border-none resize-none outline-none"
+                                        onFocus={() => setIsTextareaFocused(true)}
+                                        onBlur={() => setIsTextareaFocused(false)}
+                                        className={`w-full max-h-[200px] p-5 pr-[60px] text-base leading-relaxed bg-transparent text-neutral-900 dark:text-white placeholder-neutral-400 dark:placeholder-neutral-500 border-none resize-none outline-none focus:outline-none focus:ring-0 transition-all duration-300 ease-out ${
+                                            isTextareaFocused ? 'min-h-[120px]' : 'min-h-[64px]'
+                                        }`}
                                         placeholder="Paste an Amazon.ae link or search for a product..."
                                         rows={1}
                                     />
