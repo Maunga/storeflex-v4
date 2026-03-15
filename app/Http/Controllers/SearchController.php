@@ -321,7 +321,8 @@ class SearchController extends Controller
         // Build closures for concurrent execution
         $tasks = [];
         foreach ($asins as $asin) {
-            $tasks[$asin] = fn() => $this->amazonAeScraperService->pullSiteData($prefix . $asin);
+            //TODO: Preload ASIN
+            //$tasks[$asin] = fn() => $this->amazonAeScraperService->pullSiteData($prefix . $asin);
         }
 
         try {
