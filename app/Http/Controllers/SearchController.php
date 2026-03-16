@@ -322,7 +322,7 @@ class SearchController extends Controller
         $tasks = [];
         foreach ($asins as $asin) {
             //TODO: Preload ASIN
-            //$tasks[$asin] = fn() => $this->amazonAeScraperService->pullSiteData($prefix . $asin);
+            $tasks[$asin] = fn() => $this->amazonAeScraperService->pullSiteData($prefix . $asin);
         }
 
         try {

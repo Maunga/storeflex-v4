@@ -292,6 +292,8 @@ class AmazonAeScraperService implements EcommerceScraperInterface
         $overall_commission_to_use = $price_aed >= env('DISCOUNT_ELIGIBLE_AED_PRICE') ? config('app.overall_commission_percentage') : config('app.overall_commission_percentage');
         $total_price = ($weight_calculation + $price_with_comm + $shipping_price_usd) * (1 + ($overall_commission_to_use / 100));
 
+        // Account for shipping  price increase due to Iran war
+        $total_price = ($total_price * 1.05) + 2;
         return number_format($total_price, 2);
     }
 
